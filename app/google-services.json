@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "983081736919",
+    "project_id": "foodcare-15178",
+    "storage_bucket": "foodcare-15178.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:983081736919:android:046c3937dc87498a14ae92",
+        "android_client_info": {
+          "package_name": "com.example.foodcare"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJMoU4n2rtld5IXSJEU_UNDIkRLlkQYx4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
