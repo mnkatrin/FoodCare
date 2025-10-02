@@ -8,8 +8,9 @@ import com.example.foodcare.databinding.ActivityForgotPasswordBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.example.foodcare.ui.base.FullScreenActivity
 
-class ForgotPasswordActivity : AppCompatActivity() {
+class ForgotPasswordActivity : FullScreenActivity() {
 
     private lateinit var binding: ActivityForgotPasswordBinding
     private lateinit var auth: FirebaseAuth
@@ -39,7 +40,7 @@ class ForgotPasswordActivity : AppCompatActivity() {
 
     private fun resetPassword() {
         // Получаем email из TextInputEditText внутри TextInputLayout
-        val email = binding.etEmailReset.editText?.text.toString().trim()
+        val email = binding.etEmailReset.text.toString().trim()
 
         // Валидация email
         if (email.isEmpty()) {

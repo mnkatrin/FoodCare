@@ -51,18 +51,5 @@
         android:layout_marginTop="50dp" />
 
     <!-- Кнопка Далее -->
-    <Button
-        android:id="@+id/button"
-        android:layout_width="311dp"
-        android:layout_height="94dp"
-        android:backgroundTint="#2DC0FF"
-        android:fontFamily="@font/mulish_bold"
-        android:text="Далее"
-        android:textColor="#FFFFFF"
-        android:textSize="24sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginBottom="50dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -141,16 +141,6 @@
         app:srcCompat="@drawable/rectangle_3" />
 
     <ImageView
-        android:id="@+id/imageView5"
-        android:layout_width="196dp"
-        android:layout_height="181dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView4"
-        app:srcCompat="@drawable/frame_47417"
-        android:layout_marginTop="-80dp" />
-
-    <ImageView
         android:id="@+id/imageView6"
         android:layout_width="0dp"
         android:layout_height="54dp"

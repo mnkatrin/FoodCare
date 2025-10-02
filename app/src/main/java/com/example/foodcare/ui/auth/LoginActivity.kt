@@ -7,48 +7,35 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.foodcare.databinding.ActivityLoginBinding
 import com.example.foodcare.ui.main.MainActivity
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
     private lateinit var auth: FirebaseAuth
+    private val db = Firebase.firestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Инициализация Firebase Auth
         auth = Firebase.auth
-
-        // Проверяем локально сохраненного пользователя
-        checkCachedUser()
-
         setupClickListeners()
     }
 
-    private fun checkCachedUser() {
-        val currentUser = auth.currentUser
-        if (currentUser != null) {
-            // Пользователь уже авторизован локально - сразу переходим
-            navigateToMain()
-        }
-    }
-
     private fun setupClickListeners() {
-        // Кнопка "Войти"
         binding.button2.setOnClickListener {
             performLogin()
         }
 
-        // Кнопка "Зарегистрироваться"
         binding.button3.setOnClickListener {
             navigateToRegister()
         }
 
-        // Кнопка "Забыли пароль?"
         binding.button5.setOnClickListener {
             navigateToForgotPassword()
         }
@@ -58,65 +45,162 @@ class LoginActivity : AppCompatActivity() {
         val email = binding.etEmail.text.toString().trim()
         val password = binding.etPassword.text.toString().trim()
 
-        println("DEBUG: Attempting login with: $email")
-
         // Валидация полей
         if (email.isEmpty()) {
-            showError("Введите email")
+            showError("Введите email или номер телефона")
+            binding.etEmail.requestFocus()
             return
         }
 
         if (password.isEmpty()) {
             showError("Введите пароль")
+            binding.etPassword.requestFocus()
             return
         }
 
         // Блокируем кнопку на время авторизации
         binding.button2.isEnabled = false
+        binding.button2.text = "Вход..."
 
-        // Авторизация через Firebase
-        auth.signInWithEmailAndPassword(email, password)
+        // Определяем тип ввода (email или телефон)
+        val inputType = determineInputType(email)
+        if (inputType == InputType.UNKNOWN) {
+            showError("Введите корректный email или номер телефона")
+            binding.etEmail.requestFocus()
+            binding.button2.isEnabled = true
+            binding.button2.text = "Войти"
+            return
+        }
+
+        // Пытаемся войти
+        attemptLogin(email, password, inputType)
+    }
+
+    private fun determineInputType(input: String): InputType {
+        return when {
+            android.util.Patterns.EMAIL_ADDRESS.matcher(input).matches() -> InputType.EMAIL
+            isValidPhoneNumber(input) -> InputType.PHONE
+            else -> InputType.UNKNOWN
+        }
+    }
+
+    private fun isValidPhoneNumber(phone: String): Boolean {
+        val cleanPhone = phone.replace("[^0-9]".toRegex(), "")
+        return when {
+            cleanPhone.length !in 10..12 -> false
+            cleanPhone.startsWith("7") || cleanPhone.startsWith("8") ||
+                    cleanPhone.startsWith("9") && cleanPhone.length == 11 -> true
+            cleanPhone.length == 10 -> true
+            else -> false
+        }
+    }
+
+    private fun attemptLogin(emailOrPhone: String, password: String, inputType: InputType) {
+        val loginEmail = if (inputType == InputType.PHONE) {
+            // Для телефона создаем временный email
+            val formattedPhone = formatPhoneNumber(emailOrPhone)
+            "${formattedPhone.replace("[^0-9]".toRegex(), "")}@foodcare.com"
+        } else {
+            emailOrPhone
+        }
+
+        auth.signInWithEmailAndPassword(loginEmail, password)
             .addOnCompleteListener(this) { task ->
                 binding.button2.isEnabled = true
+                binding.button2.text = "Войти"
 
                 if (task.isSuccessful) {
-                    println("DEBUG: Login successful, navigating to MainActivity")
-                    showSuccess("Успешный вход!")
-                    navigateToMain()
+                    // Успешный вход
+                    handleSuccessfulLogin()
                 } else {
-                    println("DEBUG: Login failed: ${task.exception?.message}")
-                    handleLoginError(task.exception)
+                    // Ошибка входа
+                    handleLoginError(task.exception, emailOrPhone, password, inputType)
                 }
             }
     }
 
-    private fun handleLoginError(exception: Exception?) {
-        val errorMessage = when {
-            exception?.message?.contains("network", true) == true -> {
-                // Нет интернета - проверяем локальный кэш
-                checkOfflineAccess()
-                return
-            }
-            exception?.message?.contains("password", true) == true ->
-                "Неверный пароль"
-            exception?.message?.contains("user-not-found", true) == true ->
-                "Аккаунт не найден. Зарегистрируйтесь"
-            exception?.message?.contains("invalid-email", true) == true ->
-                "Неверный формат email"
-            else -> "Ошибка авторизации: ${exception?.message}"
+    private fun formatPhoneNumber(phone: String): String {
+        val cleanPhone = phone.replace("[^0-9]".toRegex(), "")
+        return when {
+            cleanPhone.length == 10 -> "+7$cleanPhone"
+            cleanPhone.startsWith("7") && cleanPhone.length == 11 -> "+$cleanPhone"
+            cleanPhone.startsWith("8") && cleanPhone.length == 11 -> "+7${cleanPhone.substring(1)}"
+            cleanPhone.startsWith("9") && cleanPhone.length == 11 -> "+7$cleanPhone"
+            else -> "+$cleanPhone"
         }
-        showError(errorMessage)
+    }
+
+    private fun handleSuccessfulLogin() {
+        showSuccess("Успешный вход!")
+        navigateToMain()
+    }
+
+    private fun handleLoginError(exception: Exception?, emailOrPhone: String, password: String, inputType: InputType) {
+        when {
+            exception is FirebaseAuthInvalidUserException -> {
+                // Пользователь не существует, удален или отключен
+                when (inputType) {
+                    InputType.EMAIL -> showError("Пользователь с таким email не существует")
+                    InputType.PHONE -> showError("Пользователь с таким номером телефона не существует")
+                    else -> showError("Пользователь не существует")
+                }
+                binding.etEmail.requestFocus()
+            }
+            exception?.message?.contains("user-not-found", true) == true -> {
+                // Пользователь не найден
+                when (inputType) {
+                    InputType.EMAIL -> showError("Пользователь с таким email не зарегистрирован")
+                    InputType.PHONE -> showError("Пользователь с таким номером телефона не зарегистрирован")
+                    else -> showError("Пользователь не найден")
+                }
+                binding.etEmail.requestFocus()
+            }
+            exception?.message?.contains("wrong-password", true) == true -> {
+                // Неверный пароль
+                showError("Неверный пароль")
+                binding.etPassword.requestFocus()
+                binding.etPassword.text?.clear()
+            }
+            exception?.message?.contains("invalid-email", true) == true -> {
+                // Неверный формат email
+                showError("Неверный формат email")
+                binding.etEmail.requestFocus()
+            }
+            exception?.message?.contains("network", true) == true -> {
+                // Нет интернета
+                checkOfflineAccess()
+            }
+            exception?.message?.contains("too-many-requests", true) == true -> {
+                // Слишком много попыток
+                showError("Слишком много попыток входа. Попробуйте позже")
+            }
+            else -> {
+                // Другие ошибки
+                showError("Пользователь с таким номером телефона или email не зарегистрирован")
+            }
+        }
     }
 
     private fun checkOfflineAccess() {
         val currentUser = auth.currentUser
         if (currentUser != null) {
-            // Есть локально сохраненный пользователь - разрешаем вход
-            showSuccess("Оффлайн режим. Добро пожаловать!")
-            navigateToMain()
+            // Проверяем валидность пользователя для оффлайн режима
+            verifyUserForOffline(currentUser)
         } else {
-            // Нет локального пользователя и нет интернета
             showError("Нет подключения к интернету. Вход невозможен")
+        }
+    }
+
+    private fun verifyUserForOffline(user: com.google.firebase.auth.FirebaseUser) {
+        user.getIdToken(false).addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                showSuccess("Оффлайн режим. Добро пожаловать!")
+                navigateToMain()
+            } else {
+                // Пользователь невалиден даже для оффлайн режима
+                auth.signOut()
+                showError("Сессия истекла. Требуется подключение к интернету")
+            }
         }
     }
 
@@ -131,7 +215,7 @@ class LoginActivity : AppCompatActivity() {
     private fun navigateToMain() {
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
-        finish()
+        finishAffinity()
     }
 
     private fun navigateToRegister() {
@@ -142,5 +226,9 @@ class LoginActivity : AppCompatActivity() {
     private fun navigateToForgotPassword() {
         val intent = Intent(this, ForgotPasswordActivity::class.java)
         startActivity(intent)
+    }
+
+    enum class InputType {
+        EMAIL, PHONE, UNKNOWN
     }
 }

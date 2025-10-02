@@ -6,8 +6,9 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.foodcare.databinding.ActivityMainBinding
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.example.foodcare.ui.base.FullScreenActivity
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : FullScreenActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private val auth = Firebase.auth
