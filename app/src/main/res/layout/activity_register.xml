@@ -26,57 +26,34 @@
         app:layout_constraintVertical_bias="0.596"
         app:layout_marginBaseline="100dp">
 
-        <com.google.android.material.textfield.TextInputLayout
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etEmail2"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginBottom="20dp"
-            android:background="@drawable/rectangle_1"
-            android:hint="Email or phone"
-            android:textColorHint="#241C1C">
+            android:layout_height="51dp"
+            android:layout_marginBottom="15dp"
+            android:background="#FFFFFF"
+            android:fontFamily="@font/mulish"
+            android:hint="Email" />
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:layout_marginBottom="15dp"
-                android:fontFamily="@font/mulish"
-                android:hint="Email"
-                android:padding="16dp"
-                android:textAlignment="textStart"
-                android:textSize="20sp" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etPassword2"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginBottom="20dp"
-            android:background="@drawable/rectangle_1"
-            android:hint="Email or phone"
-            android:textColorHint="#241C1C">
+            android:layout_height="51dp"
+            android:layout_marginBottom="15dp"
+            android:background="#FFFFFF"
+            android:fontFamily="@font/mulish"
+            android:hint="Пароль" />
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:layout_marginBottom="15dp"
-                android:fontFamily="@font/mulish"
-                android:hint="Пароль"
-                android:padding="16dp"
-                android:textAlignment="textStart"
-                android:textSize="20sp" />
-        </com.google.android.material.textfield.TextInputLayout>
 
         <Button
-            android:id="@+id/button4"
-            style="@android:style/Widget.Material.Button"
+            android:id="@+id/button"
             android:layout_width="match_parent"
-            android:layout_height="72dp"
-            android:layout_marginBottom="20dp"
-            android:background="#A2E0FA"
+            android:layout_height="70dp"
+            android:backgroundTint="#A2E0FA"
             android:fontFamily="@font/mulish_bold"
-            android:stateListAnimator="@anim/nav_default_enter_anim"
             android:text="Зарегистрироваться"
-            android:textAlignment="center"
-            android:textColor="#000000"
-            android:textSize="24sp" />
+            android:textColor="#181616"
+            android:textSize="20sp" />
 
     </LinearLayout>
 
@@ -96,4 +73,5 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         tools:layout_editor_absoluteY="106dp" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

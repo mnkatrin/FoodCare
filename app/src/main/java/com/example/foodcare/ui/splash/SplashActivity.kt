@@ -1,9 +1,9 @@
 package com.example.foodcare.ui.splash
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
+import androidx.appcompat.app.AppCompatActivity
 import com.example.foodcare.R
 import com.example.foodcare.ui.auth.LoginActivity
 
@@ -13,9 +13,10 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
 
-        // Находим кнопку и настраиваем переход
-        findViewById<Button>(R.id.imageButton).setOnClickListener {
-            startActivity(Intent(this, LoginActivity::class.java))
+        val button = findViewById<Button>(R.id.button)
+        button.setOnClickListener {
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
             finish()
         }
     }

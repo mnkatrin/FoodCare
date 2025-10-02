@@ -2,11 +2,12 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/linearLayout"
+    android:id="@+id/Login"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#383737"
-    android:gravity="center">
+    android:gravity="center"
+    android:paddingTop="5dp">
 
     <TextView
         android:id="@+id/textView3"
@@ -26,6 +27,7 @@
         tools:layout_editor_absoluteY="116dp" />
 
     <LinearLayout
+        android:id="@+id/loginFormLayout"
         android:layout_width="350dp"
         android:layout_height="380dp"
         android:orientation="vertical"
@@ -37,81 +39,56 @@
         app:layout_constraintVertical_bias="0.596"
         app:layout_marginBaseline="100dp">
 
-        <com.google.android.material.textfield.TextInputLayout
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etEmail"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginBottom="20dp"
-            android:background="@drawable/rectangle_1"
-            android:hint="Email or phone"
-            android:textColorHint="#241C1C">
+            android:layout_height="51dp"
+            android:layout_marginBottom="15dp"
+            android:background="#FFFFFF"
+            android:fontFamily="@font/mulish"
+            android:hint="Email" />
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:layout_marginBottom="15dp"
-                android:fontFamily="@font/mulish"
-                android:hint="Email"
-                android:padding="16dp"
-                android:textAlignment="textStart"
-                android:textSize="20sp" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etPassword"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginBottom="20dp"
-            android:background="@drawable/rectangle_1"
-            android:hint="Email or phone"
-            android:textColorHint="#241C1C">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:layout_marginBottom="15dp"
-                android:fontFamily="@font/mulish"
-                android:hint="Пароль"
-                android:padding="16dp"
-                android:textAlignment="textStart"
-                android:textSize="20sp" />
-        </com.google.android.material.textfield.TextInputLayout>
+            android:layout_height="51dp"
+            android:layout_marginBottom="15dp"
+            android:background="#FFFFFF"
+            android:fontFamily="@font/mulish"
+            android:hint="Пароль" />
 
         <Button
-            android:id="@+id/button4"
-            style="@android:style/Widget.Material.Button"
+            android:id="@+id/button2"
             android:layout_width="match_parent"
-            android:layout_height="72dp"
-            android:layout_marginBottom="20dp"
-            android:background="#A2E0FA"
+            android:layout_height="70dp"
+            android:backgroundTint="#2DC0FF"
             android:fontFamily="@font/mulish_bold"
-            android:stateListAnimator="@anim/nav_default_enter_anim"
-            android:text="Зарегистрироваться"
-            android:textAlignment="center"
-            android:textColor="#000000"
-            android:textSize="24sp" />
+            android:text="Войти"
+            android:textColor="#FFFF"
+            android:textSize="20sp" />
 
         <Button
             android:id="@+id/button3"
-            style="@android:style/Widget.Material.Button"
             android:layout_width="match_parent"
-            android:layout_height="72dp"
-            android:layout_marginBottom="20dp"
-            android:background="#2DC0FF"
+            android:layout_height="70dp"
+            android:backgroundTint="#A2E0FA"
             android:fontFamily="@font/mulish_bold"
-            android:stateListAnimator="@anim/nav_default_enter_anim"
-            android:text="Войти"
-            android:textAlignment="center"
-            android:textColor="#FFFFFFFF"
-            android:textSize="24sp" />
+            android:text="Зарегистрироваться"
+            android:textColor="#181616"
+            android:textSize="20sp" />
 
         <Button
             android:id="@+id/button5"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="#00FFFFFF"
             android:fontFamily="@font/mulish_light"
             android:text="Забыли пароль?"
             android:textAlignment="center"
             android:textColor="#FFFFFFFF"
             android:textSize="20sp" />
+
     </LinearLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
