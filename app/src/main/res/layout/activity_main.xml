@@ -13,7 +13,7 @@
         android:id="@+id/foodCareLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingLeft="15dp"
+        android:paddingStart="15dp"
         android:paddingTop="10dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -69,11 +69,10 @@
             android:layout_weight="1"
             android:layout_marginEnd="8dp">
 
-
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnRecipes"
-                android:layout_width="185dp"
-                android:layout_height="185dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:backgroundTint="#B7D4FF"
                 android:fontFamily="@font/mulish_bold"
                 android:gravity="bottom|center_horizontal"
@@ -81,7 +80,7 @@
                 android:text="Рецепты"
                 android:textColor="#000"
                 android:textSize="20sp"
-                app:cornerRadius="16dp" />/>
+                app:cornerRadius="16dp" />
 
             <ImageView
                 android:id="@+id/recipesImage"
@@ -103,8 +102,8 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnProducts"
-                android:layout_width="185dp"
-                android:layout_height="185dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:backgroundTint="#BFFBC8"
                 android:fontFamily="@font/mulish_bold"
                 android:gravity="bottom|center_horizontal"
@@ -127,29 +126,42 @@
 
     </LinearLayout>
 
-    <ImageView
-        android:id="@+id/imageView4"
-        android:layout_width="422dp"
-        android:layout_height="218dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="228dp"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.511"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonsContainer"
-        app:srcCompat="@drawable/rectangle_3" />
-
-    <ImageView
-        android:id="@+id/imageView6"
-        android:layout_width="0dp"
-        android:layout_height="54dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+    <!-- FrameLayout как НАЛОЖЕНИЕ -->
+    <FrameLayout
+        android:id="@+id/bottomFrame"
+        android:layout_width="410dp"
+        android:layout_height="193dp"
+        android:alpha="0.9"
+        android:background="@drawable/rectangle_3"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:srcCompat="@drawable/frame_180"
-        android:layout_marginBottom="16dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <!-- ИСПРАВЛЕННАЯ кнопка профиля - теперь это Button -->
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="375dp"
+            android:layout_height="153dp"
+            android:layout_gravity="center"
+            android:scaleType="fitEnd"
+            app:srcCompat="@drawable/frame_180" />
+
+        <!-- Кнопка профиля - ПРОЗРАЧНАЯ -->
+        <Button
+            android:id="@+id/profileButton"
+            android:layout_width="55dp"
+            android:layout_height="60dp"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="20dp"
+            android:background="@android:color/transparent"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:text="Выход"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp" />
+
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

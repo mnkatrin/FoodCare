@@ -11,12 +11,17 @@ import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import android.util.Log
 
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
     private lateinit var auth: FirebaseAuth
     private val db = Firebase.firestore
+
+    companion object {
+        private const val TAG = "LoginActivity"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -129,7 +134,6 @@ class LoginActivity : AppCompatActivity() {
             else -> "+$cleanPhone"
         }
     }
-
     private fun handleSuccessfulLogin() {
         showSuccess("Успешный вход!")
         navigateToMain()
@@ -213,9 +217,16 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun navigateToMain() {
-        val intent = Intent(this, MainActivity::class.java)
+        Log.d(TAG, "Navigating to MainActivity")
+
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            putExtra("SHOW_WELCOME", true) // Добавляем флаг для приветствия
+        }
         startActivity(intent)
-        finishAffinity()
+        finish()
+
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
     }
 
     private fun navigateToRegister() {
