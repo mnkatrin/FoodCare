@@ -23,11 +23,13 @@ class MainActivity : FullScreenActivity() {
     private var xDelta = 0f
     private var yDelta = 0f
     private var isDragging = false
-    private val CLICK_THRESHOLD = 10f
+    private val clickThreshold = 10f
 
     companion object {
         private const val TAG = "MainActivity"
         private const val PREF_WELCOME_SHOWN = "welcome_shown"
+        private const val PROFILE_BUTTON_X = "profile_button_x"
+        private const val PROFILE_BUTTON_Y = "profile_button_y"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -111,11 +113,10 @@ class MainActivity : FullScreenActivity() {
 
         try {
             val draggableButton = binding.profileButton
-            val parentFrame = binding.bottomFrame
 
             // Загружаем сохраненное положение кнопки профиля
-            val savedX = sharedPreferences.getFloat("profile_button_x", -1f)
-            val savedY = sharedPreferences.getFloat("profile_button_y", -1f)
+            val savedX = sharedPreferences.getFloat(PROFILE_BUTTON_X, -1f)
+            val savedY = sharedPreferences.getFloat(PROFILE_BUTTON_Y, -1f)
 
             Log.d(TAG, "Saved position: x=$savedX, y=$savedY")
 
@@ -129,7 +130,7 @@ class MainActivity : FullScreenActivity() {
             }
 
             draggableButton.setOnTouchListener { view, event ->
-                when (event.action) {
+                when (event.action and MotionEvent.ACTION_MASK) {
                     MotionEvent.ACTION_DOWN -> {
                         xDelta = view.x - event.rawX
                         yDelta = view.y - event.rawY
@@ -143,12 +144,12 @@ class MainActivity : FullScreenActivity() {
                         val moveY = event.rawY + yDelta
 
                         // Проверяем, было ли движение достаточным для перетаскивания
-                        if (Math.abs(moveX - view.x) > CLICK_THRESHOLD ||
-                            Math.abs(moveY - view.y) > CLICK_THRESHOLD) {
+                        if (Math.abs(moveX - view.x) > clickThreshold ||
+                            Math.abs(moveY - view.y) > clickThreshold) {
                             isDragging = true
                         }
 
-                        val parent = view.parent as android.view.View
+                        val parent = view.parent as? android.view.View ?: return@setOnTouchListener true
                         val maxX = parent.width - view.width
                         val maxY = parent.height - view.height
 
@@ -193,6 +194,7 @@ class MainActivity : FullScreenActivity() {
             .setPositiveButton("Выйти") { dialog, _ ->
                 Log.d(TAG, "User confirmed logout")
                 performLogout()
+                dialog.dismiss()
             }
             .setNegativeButton("Отмена") { dialog, _ ->
                 Log.d(TAG, "User canceled logout")
@@ -269,8 +271,8 @@ class MainActivity : FullScreenActivity() {
     private fun saveButtonPosition(x: Float, y: Float) {
         try {
             sharedPreferences.edit()
-                .putFloat("profile_button_x", x)
-                .putFloat("profile_button_y", y)
+                .putFloat(PROFILE_BUTTON_X, x)
+                .putFloat(PROFILE_BUTTON_Y, y)
                 .apply()
             Log.d(TAG, "Position saved: x=$x, y=$y")
         } catch (e: Exception) {
@@ -280,6 +282,9 @@ class MainActivity : FullScreenActivity() {
 
     override fun onPause() {
         super.onPause()
-        saveButtonPosition(binding.profileButton.x, binding.profileButton.y)
+        // Сохраняем позицию только если активити не уничтожается
+        if (!isFinishing) {
+            saveButtonPosition(binding.profileButton.x, binding.profileButton.y)
+        }
     }
 }
