@@ -5,17 +5,20 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.MotionEvent
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.example.foodcare.databinding.ActivityMainBinding
 import com.example.foodcare.ui.auth.LoginActivity
 import com.example.foodcare.ui.base.FullScreenActivity
+import com.example.foodcare.ui.profile.ProfileManager
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
-class MainActivity : FullScreenActivity() {
+class MainActivity : FullScreenActivity(), ProfileManager.ProfileListener {
 
     private lateinit var binding: ActivityMainBinding
+    private lateinit var profileManager: ProfileManager
     private lateinit var sharedPreferences: SharedPreferences
     private val auth = Firebase.auth
 
@@ -37,6 +40,11 @@ class MainActivity : FullScreenActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Инициализируем менеджер профиля
+        profileManager = ProfileManager(this, binding.root)
+        profileManager.setProfileListener(this)
+        profileManager.initializeProfile()
+
         sharedPreferences = getSharedPreferences("app_prefs", MODE_PRIVATE)
 
         Log.d(TAG, "MainActivity created")
@@ -52,18 +60,41 @@ class MainActivity : FullScreenActivity() {
 
         setupClickListeners()
     }
+    override fun onUserNameUpdated(newName: String) {
+        Log.d(TAG, "User name updated to: $newName")
+        // Здесь можно обновить данные в UI если нужно
+        // Например, показать Toast с подтверждением
+        Toast.makeText(this, "Имя обновлено: $newName", Toast.LENGTH_SHORT).show()
+    }
+
+    // Реализация методов ProfileListener
+    override fun onLogoutRequested() {
+        performLogout()
+    }
+
+    override fun onProfileHidden() {
+        // Восстанавливаем интерфейс после скрытия профиля
+        binding.backgroundDim.visibility = View.GONE
+        // Основной контент остается включенным
+    }
+
+    private fun showProfile() {
+        profileManager.showProfile()
+        binding.backgroundDim.visibility = View.VISIBLE
+        // НЕ отключаем основной контент - оставляем его видимым
+    }
+
+    private fun hideProfile() {
+        profileManager.hideProfile()
+    }
 
     private fun checkAndShowWelcome() {
         try {
-            // Проверяем флаг из интента (после авторизации)
             val showWelcome = intent.getBooleanExtra("SHOW_WELCOME", false)
-
             if (showWelcome) {
                 showWelcomeMessage()
-                // Помечаем, что приветствие уже показано
                 sharedPreferences.edit().putBoolean(PREF_WELCOME_SHOWN, true).apply()
             }
-
         } catch (e: Exception) {
             Log.e(TAG, "Error checking welcome: ${e.message}")
         }
@@ -73,12 +104,9 @@ class MainActivity : FullScreenActivity() {
         try {
             val currentUser = auth.currentUser
             val userName = currentUser?.displayName ?: currentUser?.email ?: "Пользователь"
-
             val welcomeMessage = "$userName, добро пожаловать!"
-
             Toast.makeText(this, welcomeMessage, Toast.LENGTH_LONG).show()
             Log.d(TAG, "Welcome message shown: $welcomeMessage")
-
         } catch (e: Exception) {
             Log.e(TAG, "Error showing welcome message: ${e.message}")
             Toast.makeText(this, "Добро пожаловать!", Toast.LENGTH_SHORT).show()
@@ -87,17 +115,29 @@ class MainActivity : FullScreenActivity() {
 
     private fun setupClickListeners() {
         Log.d(TAG, "Setting up click listeners")
-
         try {
-            // Обработчики для других кнопок
+            // Кнопка рецептов
             binding.btnRecipes.setOnClickListener {
                 Log.d(TAG, "Recipes button clicked")
                 Toast.makeText(this, "Раздел 'Рецепты' в разработке", Toast.LENGTH_SHORT).show()
             }
 
+            // Кнопка продуктов
             binding.btnProducts.setOnClickListener {
                 Log.d(TAG, "Products button clicked")
                 Toast.makeText(this, "Раздел 'Продукты' в разработке", Toast.LENGTH_SHORT).show()
+            }
+
+            // Центральная кнопка
+            binding.imageButton4.setOnClickListener {
+                Log.d(TAG, "Center button clicked")
+                Toast.makeText(this, "Основной функционал в разработке", Toast.LENGTH_SHORT).show()
+            }
+
+            // Клик на затемнение для закрытия профиля
+            binding.backgroundDim.setOnClickListener {
+                Log.d(TAG, "Background dim clicked")
+                hideProfile()
             }
 
             Log.d(TAG, "All click listeners set up successfully")
@@ -168,7 +208,7 @@ class MainActivity : FullScreenActivity() {
                         if (!isDragging) {
                             // Если не было перетаскивания - это клик
                             Log.d(TAG, "Profile button CLICKED!")
-                            showLogoutConfirmation()
+                            showProfile()
                         }
 
                         saveButtonPosition(view.x, view.y)
@@ -286,5 +326,10 @@ class MainActivity : FullScreenActivity() {
         if (!isFinishing) {
             saveButtonPosition(binding.profileButton.x, binding.profileButton.y)
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        profileManager.cleanup()
     }
 }
