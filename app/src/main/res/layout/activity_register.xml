@@ -39,7 +39,7 @@
             android:layout_marginBottom="15dp"
             android:background="@drawable/edittext_rounded"
             android:fontFamily="@font/mulish"
-            android:hint="Email или номер телефона"
+            android:hint="Email"
             android:padding="16dp" />
 
         <com.google.android.material.textfield.TextInputEditText

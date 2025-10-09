@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
+    //id("kotlin-kapt") // Добавьте этот плагин для Room
 }
 
 android {
@@ -57,4 +58,19 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+
+    // ЗАКОММЕНТИРУЙТЕ Room временно
+    // implementation("androidx.room:room-runtime:2.5.2")
+    // implementation("androidx.room:room-ktx:2.5.2")
+    // kapt("androidx.room:room-compiler:2.5.2")
+
+    // Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
+
+    // Lifecycle
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
+
+    // Hilt
+    //implementation("com.google.dagger:hilt-android:2.44")
+    //kapt("com.google.dagger:hilt-compiler:2.44")
 }

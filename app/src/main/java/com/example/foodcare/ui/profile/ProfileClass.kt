@@ -5,10 +5,13 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
+import com.example.foodcare.R
 import com.example.foodcare.databinding.ActivityProfileDrawerBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
@@ -28,7 +31,7 @@ class ProfileManager(private val context: Context, private val parentView: View)
     interface ProfileListener {
         fun onLogoutRequested()
         fun onProfileHidden()
-        fun onUserNameUpdated(newName: String) // Добавляем новый метод
+        fun onUserNameUpdated(newName: String)
     }
 
     private var profileListener: ProfileListener? = null
@@ -51,7 +54,7 @@ class ProfileManager(private val context: Context, private val parentView: View)
             if (currentUser != null) {
                 // Устанавливаем данные пользователя
                 val userName = currentUser.displayName ?: "Пользователь"
-                binding.userNameText.text = userName
+                binding.userNameEditText.setText(userName)
 
                 val userContact = currentUser.email ?: currentUser.phoneNumber ?: "Контакт не указан"
                 binding.userEmailText.text = userContact
@@ -59,7 +62,7 @@ class ProfileManager(private val context: Context, private val parentView: View)
                 Log.d(TAG, "Profile data setup: $userName, $userContact")
             } else {
                 // Если пользователь не найден, устанавливаем значения по умолчанию
-                binding.userNameText.text = "Пользователь"
+                binding.userNameEditText.setText("Пользователь")
                 binding.userEmailText.text = "email@example.com"
                 Log.w(TAG, "No user found, using default values")
             }
@@ -67,7 +70,7 @@ class ProfileManager(private val context: Context, private val parentView: View)
         } catch (e: Exception) {
             Log.e(TAG, "Error setting up profile data: ${e.message}")
             // Устанавливаем значения по умолчанию в случае ошибки
-            binding.userNameText.text = "Пользователь"
+            binding.userNameEditText.setText("Пользователь")
             binding.userEmailText.text = "email@example.com"
         }
     }
@@ -76,7 +79,24 @@ class ProfileManager(private val context: Context, private val parentView: View)
         try {
             // Редактирование имени по нажатию на карточку
             binding.userNameCard.setOnClickListener {
-                showEditNameDialog()
+                enableNameEditing()
+            }
+
+            // Обработка завершения редактирования
+            binding.userNameEditText.setOnEditorActionListener { _, actionId, _ ->
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    saveUserName()
+                    true
+                } else {
+                    false
+                }
+            }
+
+            // Потеря фокуса - сохраняем изменения
+            binding.userNameEditText.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus) {
+                    saveUserName()
+                }
             }
 
             // История
@@ -110,43 +130,69 @@ class ProfileManager(private val context: Context, private val parentView: View)
         }
     }
 
-    private fun showEditNameDialog() {
-        val currentUser = auth.currentUser
-        val currentName = currentUser?.displayName ?: ""
+    private fun enableNameEditing() {
+        try {
+            binding.userNameEditText.apply {
+                // Включаем возможность редактирования
+                isFocusable = true
+                isFocusableInTouchMode = true
+                setCursorVisible(true)
+                requestFocus()
 
-        // Создаем диалоговое окно для редактирования имени
-        val input = EditText(context).apply {
-            setText(currentName)
-            hint = "Введите ваше имя"
-            setSingleLine(true)
+                // Показываем клавиатуру
+                val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                inputMethodManager.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
+
+                // Перемещаем курсор в конец текста
+                setSelection(text.length)
+            }
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Error enabling name editing: ${e.message}")
         }
+    }
 
-        AlertDialog.Builder(context)
-            .setTitle("Изменить имя")
-            .setMessage("Введите новое имя:")
-            .setView(input)
-            .setPositiveButton("Сохранить") { dialog, _ ->
-                val newName = input.text.toString().trim()
-                if (newName.isNotEmpty()) {
-                    updateUserName(newName)
-                } else {
-                    Toast.makeText(context, "Имя не может быть пустым", Toast.LENGTH_SHORT).show()
-                }
-                dialog.dismiss()
+    private fun saveUserName() {
+        try {
+            val newName = binding.userNameEditText.text.toString().trim()
+
+            if (newName.isEmpty()) {
+                // Если имя пустое, восстанавливаем предыдущее
+                setupProfileData()
+                resetNameEditing()
+                return
             }
-            .setNegativeButton("Отмена") { dialog, _ ->
-                dialog.dismiss()
-            }
-            .show()
+
+            // Скрываем клавиатуру
+            val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            inputMethodManager.hideSoftInputFromWindow(binding.userNameEditText.windowToken, 0)
+
+            // Отключаем редактирование
+            resetNameEditing()
+
+            // Обновляем имя в Firebase
+            updateUserName(newName)
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Error saving user name: ${e.message}")
+            resetNameEditing()
+            setupProfileData() // Восстанавливаем предыдущее имя
+        }
+    }
+
+    private fun resetNameEditing() {
+        binding.userNameEditText.apply {
+            isFocusable = false
+            isFocusableInTouchMode = false
+            setCursorVisible(false)
+            clearFocus()
+        }
     }
 
     private fun updateUserName(newName: String) {
         val currentUser = auth.currentUser
 
         if (currentUser != null) {
-            // Показываем прогресс
-            Toast.makeText(context, "Обновление имени...", Toast.LENGTH_SHORT).show()
-
             // Создаем запрос на обновление профиля
             val profileUpdates = UserProfileChangeRequest.Builder()
                 .setDisplayName(newName)
@@ -158,21 +204,20 @@ class ProfileManager(private val context: Context, private val parentView: View)
                         // Успешно обновили имя в Firebase Auth
                         Log.d(TAG, "User name updated successfully: $newName")
 
-                        // Обновляем отображение имени
-                        binding.userNameText.text = newName
-
                         // Уведомляем MainActivity об обновлении
                         profileListener?.onUserNameUpdated(newName)
 
-                        Toast.makeText(context, "Имя успешно обновлено!", Toast.LENGTH_SHORT).show()
+                        // Без уведомления об успешном обновлении
                     } else {
                         // Ошибка при обновлении
                         Log.e(TAG, "Error updating user name: ${task.exception?.message}")
-                        Toast.makeText(context, "Ошибка при обновлении имени: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+
+                        // Восстанавливаем предыдущее имя
+                        setupProfileData()
                     }
                 }
         } else {
-            Toast.makeText(context, "Пользователь не найден", Toast.LENGTH_SHORT).show()
+            setupProfileData() // Восстанавливаем данные
         }
     }
 
@@ -248,6 +293,11 @@ class ProfileManager(private val context: Context, private val parentView: View)
         Log.d(TAG, "Hiding profile")
 
         try {
+            // Если редактирование активно - сохраняем изменения перед скрытием
+            if (binding.userNameEditText.isFocusable) {
+                saveUserName()
+            }
+
             binding.root.visibility = View.GONE
             profileListener?.onProfileHidden()
             Log.d(TAG, "Profile hidden successfully")
