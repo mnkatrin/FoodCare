@@ -59,7 +59,9 @@
             android:background="@drawable/edittext_rounded"
             android:fontFamily="@font/mulish"
             android:padding="16dp"
-            android:hint="Пароль" />
+            android:hint="Пароль"
+            android:inputType="textPassword"
+            />
 
         <Button
             android:id="@+id/button2"
