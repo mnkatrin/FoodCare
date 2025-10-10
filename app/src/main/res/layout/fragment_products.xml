@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#77B9BC"
+    android:backgroundTint="#E6FDFF"
+    android:paddingTop="5dp">
+
+    <!-- Food Care заголовок -->
+    <LinearLayout
+        android:id="@+id/foodCareLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="15dp"
+        android:paddingTop="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_bold"
+            android:text="Food"
+            android:textSize="24sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_bold"
+            android:text="Care"
+            android:textColor="#2DC0FF"
+            android:textSize="24sp" />
+
+    </LinearLayout>
+
+    <!-- Кнопка назад - ДОЛЖНА БЫТЬ ВЫШЕ imageView2 -->
+    <ImageButton
+        android:id="@+id/imageButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="3dp"
+        android:layout_marginTop="56dp"
+        android:backgroundTint="#00B61515"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/frame_47422" />
+
+    <!-- Текст Мои продукты -->
+    <TextView
+        android:id="@+id/textView6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="72dp"
+        android:layout_marginTop="20dp"
+        android:fontFamily="@font/mulish_bold"
+        android:text="Мои продукты"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/foodCareLayout" />
+
+    <!-- Основное изображение - ВЕРХ ОСТАЕТСЯ НА МЕСТЕ, НИЗ ПОД КНОПКАМИ -->
+
+    <!-- FrameLayout как НАЛОЖЕНИЕ (кнопки) - ПОВЕРХ КАРТИНКИ -->
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="412dp"
+        android:layout_height="637dp"
+        android:layout_marginTop="140dp"
+        android:layout_marginBottom="-100dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@drawable/frame_11" />
+
+    <FrameLayout
+        android:id="@+id/bottomFrame"
+        android:layout_width="0dp"
+        android:layout_height="193dp"
+        android:alpha="0.9"
+        android:background="@drawable/rectangle_3"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="397dp"
+            android:layout_height="153dp"
+            android:layout_gravity="center"
+            android:scaleType="fitEnd"
+            app:srcCompat="@drawable/frame_180" />
+
+        <!-- Кнопка профиля -->
+        <Button
+            android:id="@+id/profileButton"
+            android:layout_width="55dp"
+            android:layout_height="68dp"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp"
+            android:background="@android:color/transparent"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:text="Выход"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp" />
+
+        <!-- Центральная кнопка -->
+        <ImageButton
+            android:id="@+id/imageButton4"
+            android:layout_width="83dp"
+            android:layout_height="84dp"
+            android:layout_gravity="center"
+            android:layout_marginStart="0dp"
+            android:layout_marginTop="30dp"
+            android:background="@drawable/frame_47417__1_" />
+
+    </FrameLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

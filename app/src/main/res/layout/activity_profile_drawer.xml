@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="350dp"
     android:layout_height="match_parent"
-    android:background="#E6FDFF"
+    android:background="#F9FBFB"
     android:orientation="vertical"
     android:padding="16dp">
 
@@ -23,19 +23,19 @@
         android:id="@+id/userNameCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="20dp"
-        app:cardElevation="4dp"
-        app:cardBackgroundColor="#FFFFFF"
         android:layout_marginBottom="12dp"
         android:clickable="true"
         android:focusable="true"
-        android:foreground="?android:attr/selectableItemBackground">
+        android:foreground="?android:attr/selectableItemBackground"
+        app:cardBackgroundColor="#FFFFFF"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="4dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:gravity="center_vertical"
+            android:orientation="horizontal"
             android:padding="16dp">
 
             <!-- Текстовое поле для отображения/редактирования имени -->
@@ -44,18 +44,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
+                android:cursorVisible="false"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
                 android:fontFamily="@font/mulish_semibold"
+                android:imeOptions="actionDone"
+                android:maxLines="1"
+                android:padding="0dp"
+                android:singleLine="true"
                 android:text="Имя пользователя"
                 android:textColor="#000000"
                 android:textSize="18sp"
-                android:textStyle="bold"
-                android:padding="0dp"
-                android:singleLine="true"
-                android:imeOptions="actionDone"
-                android:maxLines="1"
-                android:focusable="false"
-                android:focusableInTouchMode="false"
-                android:cursorVisible="false" />
+                android:textStyle="bold" />
 
         </LinearLayout>
 
@@ -65,16 +65,16 @@
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="20dp"
-        app:cardElevation="4dp"
+        android:layout_marginBottom="24dp"
         app:cardBackgroundColor="#FFFFFF"
-        android:layout_marginBottom="24dp">
+        app:cardCornerRadius="20dp"
+        app:cardElevation="4dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:gravity="center_vertical"
+            android:orientation="horizontal"
             android:padding="16dp">
 
             <LinearLayout
@@ -87,7 +87,7 @@
                     android:id="@+id/userEmailText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/mulish_semibold"
+                    android:fontFamily="@font/inter_light"
                     android:text="email@example.com"
                     android:textColor="#666666"
                     android:textSize="14sp" />
@@ -135,7 +135,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/mulish_semibold"
+                android:fontFamily="@font/inter_light"
                 android:text="История"
                 android:textColor="#000000"
                 android:textSize="16sp" />
@@ -172,7 +172,7 @@
                 android:id="@+id/allergensText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/mulish_semibold"
+                android:fontFamily="@font/inter_light"
                 android:text="Аллергены"
                 android:textColor="#000000"
                 android:textSize="16sp" />
@@ -209,7 +209,7 @@
                 android:id="@+id/themeText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/mulish_semibold"
+                android:fontFamily="@font/inter_light"
                 android:text="Тема приложения"
                 android:textColor="#000000"
                 android:textSize="16sp" />
