@@ -81,7 +81,6 @@ class RegisterActivity : AppCompatActivity() {
             return
         }
 
-
         // Определяем тип ввода (email или телефон)
         val inputType = determineInputType(emailOrPhone)
         if (inputType == InputType.UNKNOWN) {
