@@ -11,6 +11,7 @@ import androidx.appcompat.app.AlertDialog
 import com.example.foodcare.databinding.ActivityMainBinding
 import com.example.foodcare.ui.auth.LoginActivity
 import com.example.foodcare.ui.base.FullScreenActivity
+import com.example.foodcare.ui.products.ProductsFragment
 import com.example.foodcare.ui.profile.ProfileManager
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -60,6 +61,7 @@ class MainActivity : FullScreenActivity(), ProfileManager.ProfileListener {
 
         setupClickListeners()
     }
+
     override fun onUserNameUpdated(newName: String) {
         Log.d(TAG, "User name updated to: $newName")
         // Здесь можно обновить данные в UI если нужно
@@ -122,10 +124,10 @@ class MainActivity : FullScreenActivity(), ProfileManager.ProfileListener {
                 Toast.makeText(this, "Раздел 'Рецепты' в разработке", Toast.LENGTH_SHORT).show()
             }
 
-            // Кнопка продуктов
+            // Кнопка продуктов - ИСПРАВЛЕНО: открываем фрагмент продуктов
             binding.btnProducts.setOnClickListener {
-                Log.d(TAG, "Products button clicked")
-                Toast.makeText(this, "Раздел 'Продукты' в разработке", Toast.LENGTH_SHORT).show()
+                Log.d(TAG, "Products button clicked - OPENING PRODUCTS FRAGMENT")
+                openProductsFragment()
             }
 
             // Центральная кнопка
@@ -143,8 +145,28 @@ class MainActivity : FullScreenActivity(), ProfileManager.ProfileListener {
             Log.d(TAG, "All click listeners set up successfully")
 
         } catch (e: Exception) {
-            Log.e(TAG, "Error setting click listeners: ${e.message}")
+            Log.d(TAG, "Error setting click listeners: ${e.message}")
             Toast.makeText(this, "Ошибка настройки кнопок", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    // МЕТОД ДЛЯ ОТКРЫТИЯ ФРАГМЕНТА ПРОДУКТОВ
+    private fun openProductsFragment() {
+        Log.d(TAG, "Opening ProductsFragment")
+        try {
+            val productsFragment = ProductsFragment()
+
+            // Заменяем текущий контент на фрагмент продуктов
+            supportFragmentManager.beginTransaction()
+                .replace(android.R.id.content, productsFragment)
+                .addToBackStack("products") // чтобы можно было вернуться назад
+                .commit()
+
+            Log.d(TAG, "ProductsFragment opened successfully")
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Error opening ProductsFragment: ${e.message}")
+            Toast.makeText(this, "Ошибка открытия раздела продуктов", Toast.LENGTH_SHORT).show()
         }
     }
 

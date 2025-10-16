@@ -14,6 +14,11 @@ class ProductRepository(private val productDao: ProductDao) {
     // ДОБАВИТЬ suspend
     suspend fun deleteProduct(product: Product) = productDao.deleteProduct(product)
 
+    // В ProductRepository добавьте:
+    suspend fun updateProduct(product: Product) {
+        productDao.updateProduct(product)
+    }
+
     // ДОБАВИТЬ suspend
     suspend fun addSampleProducts() {
         val currentTime = System.currentTimeMillis()

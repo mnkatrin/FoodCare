@@ -28,4 +28,19 @@ class ProductsViewModel(private val repository: ProductRepository) : ViewModel()
             repository.deleteProduct(product)
         }
     }
+
+    // Новый метод для обновления количества
+    fun updateProductQuantity(product: Product, newQuantity: String) {
+        viewModelScope.launch {
+            val updatedProduct = product.copy(quantity = newQuantity)
+            repository.updateProduct(updatedProduct)
+        }
+    }
+
+    // Метод для обновления продукта
+    fun updateProduct(product: Product) {
+        viewModelScope.launch {
+            repository.updateProduct(product)
+        }
+    }
 }

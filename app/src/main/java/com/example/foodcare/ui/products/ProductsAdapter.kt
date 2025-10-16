@@ -4,22 +4,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.foodcare.R
 import com.example.foodcare.data.model.Product
 
-class ProductsAdapter(
-    private val onProductClick: (Product) -> Unit,
-    private val onProductLongClick: (Product) -> Unit
-) : ListAdapter<Product, ProductsAdapter.ProductViewHolder>(ProductDiffCallback()) {
+class ProductAdapter(
+    private val onQuantityChanged: (Product, String) -> Unit
+) : ListAdapter<Product, ProductAdapter.ProductViewHolder>(ProductDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_product, parent, false)
-        return ProductViewHolder(view)
+        return ProductViewHolder(view, onQuantityChanged)
     }
 
     override fun onBindViewHolder(holder: ProductViewHolder, position: Int) {
@@ -27,37 +25,49 @@ class ProductsAdapter(
         holder.bind(product)
     }
 
-    inner class ProductViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val nameTextView: TextView = itemView.findViewById(R.id.productName)
-        private val categoryTextView: TextView = itemView.findViewById(R.id.productCategory)
-        private val expirationTextView: TextView = itemView.findViewById(R.id.productExpiration)
+    class ProductViewHolder(
+        itemView: View,
+        private val onQuantityChanged: (Product, String) -> Unit
+    ) : RecyclerView.ViewHolder(itemView) {
+        private val productName: TextView = itemView.findViewById(R.id.productName)
+        private val productCategory: TextView = itemView.findViewById(R.id.productCategory)
+        private val productExpiration: TextView = itemView.findViewById(R.id.productExpiration)
+        private val productQuantity: TextView = itemView.findViewById(R.id.productQuantity)
+        private val btnDecrease: TextView = itemView.findViewById(R.id.btnDecrease)
+        private val btnIncrease: TextView = itemView.findViewById(R.id.btnIncrease)
 
         fun bind(product: Product) {
-            nameTextView.text = product.name
-            categoryTextView.text = product.category
+            productName.text = product.name
+            productCategory.text = product.category
 
+            // Форматируем срок годности
             val daysLeft = product.getDaysUntilExpiration()
+            val expirationText = when {
+                daysLeft == 0L -> "Истекает сегодня"
+                daysLeft == 1L -> "Осталось: 1 день"
+                daysLeft < 5L -> "Осталось: $daysLeft дня"
+                else -> "Осталось: $daysLeft дней"
+            }
+            productExpiration.text = expirationText
 
-            // Устанавливаем текст и цвет
-            when {
-                daysLeft == 0L -> {
-                    expirationTextView.text = "Истекает сегодня!"
-                    expirationTextView.setTextColor(ContextCompat.getColor(itemView.context, R.color.red))
-                }
-                daysLeft <= 3 -> {
-                    expirationTextView.text = "Скоро истекает: $daysLeft дн."
-                    expirationTextView.setTextColor(ContextCompat.getColor(itemView.context, R.color.orange))
-                }
-                else -> {
-                    expirationTextView.text = "Осталось: $daysLeft дн."
-                    expirationTextView.setTextColor(ContextCompat.getColor(itemView.context, R.color.green))
+            // Устанавливаем количество
+            productQuantity.text = product.quantity
+
+            // Обработчики для кнопок +/-
+            btnDecrease.setOnClickListener {
+                val currentQuantity = product.quantity.replace(" шт", "").replace(" л", "").replace(" буханка", "").replace(" г", "").replace(" кг", "").replace(" банки", "").toIntOrNull() ?: 1
+                if (currentQuantity > 1) {
+                    val quantityText = product.quantity.substringAfterLast(" ")
+                    val newQuantity = (currentQuantity - 1).toString() + " " + quantityText
+                    onQuantityChanged(product, newQuantity)
                 }
             }
 
-            itemView.setOnClickListener { onProductClick(product) }
-            itemView.setOnLongClickListener {
-                onProductLongClick(product)
-                true
+            btnIncrease.setOnClickListener {
+                val currentQuantity = product.quantity.replace(" шт", "").replace(" л", "").replace(" буханка", "").replace(" г", "").replace(" кг", "").replace(" банки", "").toIntOrNull() ?: 1
+                val quantityText = product.quantity.substringAfterLast(" ")
+                val newQuantity = (currentQuantity + 1).toString() + " " + quantityText
+                onQuantityChanged(product, newQuantity)
             }
         }
     }

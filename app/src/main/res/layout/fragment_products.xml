@@ -7,7 +7,9 @@
     android:layout_height="match_parent"
     android:background="#77B9BC"
     android:backgroundTint="#E6FDFF"
-    android:paddingTop="5dp">
+    android:paddingTop="5dp"
+    android:clickable="true"
+    android:focusable="true">
 
     <!-- Food Care заголовок -->
     <LinearLayout
@@ -36,7 +38,7 @@
 
     </LinearLayout>
 
-    <!-- Кнопка назад - ДОЛЖНА БЫТЬ ВЫШЕ imageView2 -->
+    <!-- Кнопка назад -->
     <ImageButton
         android:id="@+id/imageButton"
         android:layout_width="wrap_content"
@@ -61,23 +63,40 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/foodCareLayout" />
 
-    <!-- Основное изображение - ВЕРХ ОСТАЕТСЯ НА МЕСТЕ, НИЗ ПОД КНОПКАМИ -->
-
-    <!-- FrameLayout как НАЛОЖЕНИЕ (кнопки) - ПОВЕРХ КАРТИНКИ -->
+    <!-- Основное изображение -->
     <ImageView
         android:id="@+id/imageView2"
-        android:layout_width="412dp"
-        android:layout_height="637dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:layout_marginTop="140dp"
         android:layout_marginBottom="-100dp"
         android:scaleType="centerCrop"
+        android:clickable="true"
+        android:focusable="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0"
         app:srcCompat="@drawable/frame_11" />
+
+    <!-- RecyclerView - УВЕЛИЧЕН ДО САМОГО НИЗА -->
+
+    <!-- FrameLayout как НАЛОЖЕНИЕ (кнопки) -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/productsRecyclerView"
+        android:layout_width="458dp"
+        android:layout_height="698dp"
+        android:background="@android:color/transparent"
+        android:clipToPadding="false"
+        android:paddingHorizontal="8dp"
+        android:paddingTop="25dp"
+        android:paddingBottom="10dp"
+        app:layout_constraintBottom_toBottomOf="@+id/bottomFrame"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.533"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.675" />
 
     <FrameLayout
         android:id="@+id/bottomFrame"
