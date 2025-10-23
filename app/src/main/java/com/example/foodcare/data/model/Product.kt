@@ -10,7 +10,8 @@ data class Product(
     val name: String,
     val category: String,
     val expirationDate: Long,
-    val quantity: String = "1 шт."
+    val quantity: String = "1 шт.",
+    val imageUri: String? = null
 ) {
     fun getDaysUntilExpiration(): Long {
         val currentTime = System.currentTimeMillis()

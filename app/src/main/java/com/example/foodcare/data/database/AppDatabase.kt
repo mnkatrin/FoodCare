@@ -1,15 +1,13 @@
 package com.example.foodcare.data.database
 
-import androidx.room.Database
-import androidx.room.Room
-import androidx.room.RoomDatabase
 import android.content.Context
+import androidx.room.*
 import com.example.foodcare.data.dao.ProductDao
 import com.example.foodcare.data.model.Product
 
 @Database(
     entities = [Product::class],
-    version = 1,
+    version = 2, // Увеличил с 1 до 2
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -19,13 +17,14 @@ abstract class AppDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
-        fun getInstance(context: Context): AppDatabase {
+        fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "products_db"
-                ).build()
+                    "foodcare_database"
+                ).fallbackToDestructiveMigration() // Простое решение - удаляет старую БД
+                    .build()
                 INSTANCE = instance
                 instance
             }

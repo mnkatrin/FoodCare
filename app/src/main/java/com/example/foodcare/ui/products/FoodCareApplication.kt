@@ -12,7 +12,6 @@ class FoodCareApplication : Application() {
         // Инициализация Firebase
         FirebaseApp.initializeApp(this)
 
-        // Инициализация Room (ленивая)
-        AppDatabase.getInstance(this)
+        AppDatabase.getDatabase(this)
     }
 }
