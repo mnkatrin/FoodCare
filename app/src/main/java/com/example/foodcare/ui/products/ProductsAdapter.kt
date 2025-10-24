@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.foodcare.R
 import com.example.foodcare.data.model.Product
-import java.util.Locale
 
 class ProductAdapter(
     private val onQuantityChanged: (Product, String) -> Unit
@@ -93,19 +92,13 @@ class ProductAdapter(
         // Вспомогательные функции для работы с разными единицами
         private fun parseQuantity(quantity: String): Pair<Double, String> {
             return try {
-                val value = quantity.replace(" шт", "")
-                    .replace(" л", "")
-                    .replace(" мл", "")
-                    .replace(" г", "")
-                    .replace(" кг", "")
-                    .replace(" банки", "")
-                    .trim()
-
+                val value = quantity.replace(" шт", "").replace(" л", "").replace(" мл", "")
+                    .replace(" г", "").replace(" кг", "").replace(" банки", "").trim()
                 val unit = when {
                     quantity.contains("л") && !quantity.contains("мл") -> "л"
                     quantity.contains("мл") -> "мл"
                     quantity.contains("кг") -> "кг"
-                    quantity.contains("г") && !quantity.contains("кг") -> "г"
+                    quantity.contains("г") -> "г"
                     quantity.contains("банки") -> "банки"
                     else -> "шт"
                 }
@@ -117,73 +110,28 @@ class ProductAdapter(
 
         private fun formatQuantity(value: Double, unit: String): String {
             return when (unit) {
-                "л" -> {
-                    // Для литров: если значение >= 1 и целое, показываем без десятичных
-                    if (value >= 1.0 && value == value.toInt().toDouble()) {
-                        "${value.toInt()} л"
-                    } else {
-                        // Округляем до 1 знака после запятой
-                        String.format(Locale.US, "%.1f л", value)
-                    }
-                }
-                "мл" -> {
-                    // Автоматическая конвертация мл в литры
-                    if (value >= 1000) {
-                        val liters = value / 1000
-                        if (liters == liters.toInt().toDouble()) {
-                            "${liters.toInt()} л"
-                        } else {
-                            String.format(Locale.US, "%.1f л", liters)
-                        }
-                    } else {
-                        "${value.toInt()} мл"
-                    }
-                }
-                "г" -> {
-                    // Автоматическая конвертация граммов в кг
-                    if (value >= 1000) {
-                        val kg = value / 1000
-                        if (kg == kg.toInt().toDouble()) {
-                            "${kg.toInt()} кг"
-                        } else {
-                            String.format(Locale.US, "%.1f кг", kg)
-                        }
-                    } else {
-                        "${value.toInt()} г"
-                    }
-                }
-                "кг" -> {
-                    // Для кг: если значение целое, показываем без десятичных
-                    if (value == value.toInt().toDouble()) {
-                        "${value.toInt()} кг"
-                    } else {
-                        String.format(Locale.US, "%.1f кг", value)
-                    }
-                }
+                "л", "кг" -> if (value == value.toInt().toDouble()) "${value.toInt()} $unit" else "$value $unit"
+                "мл", "г" -> "${value.toInt()} $unit" // для мл и г используем целые числа
                 "банки" -> "${value.toInt()} банки"
-                else -> "${value.toInt()} шт" // для штук
+                else -> "${value.toInt()} шт"
             }
         }
 
         private fun getMinQuantity(unit: String): Double {
             return when (unit) {
-                "л" -> 0.1
-                "мл" -> 50.0
-                "г" -> 50.0
-                "кг" -> 0.1
+                "л", "кг" -> 0.1
+                "мл", "г" -> 50.0 // минимально 50 мл/г
                 "банки" -> 1.0
-                else -> 1.0
+                else -> 1.0 // для штук
             }
         }
 
         private fun getStep(unit: String): Double {
             return when (unit) {
-                "л" -> 0.1 // шаг 100 мл
-                "мл" -> 50.0 // шаг 50 мл
-                "г" -> 50.0 // шаг 50 г
-                "кг" -> 0.1 // шаг 100 г
+                "л", "кг" -> 0.1 // шаг 100 мл для литров, 100 г для кг
+                "мл", "г" -> 50.0 // шаг 50 мл/г
                 "банки" -> 1.0
-                else -> 1.0
+                else -> 1.0 // для штук
             }
         }
     }

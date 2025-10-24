@@ -61,9 +61,21 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/foodCareLayout" />
 
-    <!-- Основное изображение -->
+    <!-- Empty State (добавлен только этот блок) -->
+    <TextView
+        android:id="@+id/emptyState"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Продуктов пока нет"
+        android:textSize="16sp"
+        android:textColor="#666"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- RecyclerView -->
+    <!-- Основное изображение -->
     <ImageView
         android:id="@+id/imageView2"
         android:layout_width="0dp"
@@ -112,6 +124,48 @@
             app:srcCompat="@drawable/frame_180" />
 
         <!-- Кнопка профиля -->
+        <Button
+            android:id="@+id/Button4"
+            android:layout_width="55dp"
+            android:layout_height="68dp"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="85dp"
+            android:layout_marginBottom="10dp"
+            android:background="@android:color/transparent"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/Button3"
+            android:layout_width="55dp"
+            android:layout_height="68dp"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="270dp"
+            android:layout_marginBottom="10dp"
+            android:background="@android:color/transparent"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/Button5"
+            android:layout_width="55dp"
+            android:layout_height="68dp"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="350dp"
+            android:layout_marginBottom="10dp"
+            android:background="@android:color/transparent"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp" />
+
         <Button
             android:id="@+id/profileButton"
             android:layout_width="55dp"

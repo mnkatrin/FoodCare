@@ -7,7 +7,7 @@ import com.example.foodcare.data.model.Product
 
 @Database(
     entities = [Product::class],
-    version = 2, // Увеличил с 1 до 2
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

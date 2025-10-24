@@ -9,7 +9,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.foodcare.R
-import com.example.foodcare.data.database.AppDatabase
 import com.example.foodcare.data.repository.ProductRepository
 import com.example.foodcare.databinding.FragmentProductsBinding
 import com.example.foodcare.ui.profile.ProfileManager
@@ -23,10 +22,9 @@ class ProductsFragment : Fragment(), ProfileManager.ProfileListener {
     private lateinit var profileManager: ProfileManager
     private var isProfileShowing = false
 
-    // Создаем repository напрямую
-    private val repository by lazy {
-        val productDao = AppDatabase.getDatabase(requireContext()).productDao()
-        ProductRepository(productDao)
+    // Получаем repository из FoodCareApplication
+    private val repository: ProductRepository by lazy {
+        (requireContext().applicationContext as com.example.foodcare.FoodCareApplication).productRepository
     }
 
     private val viewModel: ProductsViewModel by viewModels {
@@ -57,6 +55,7 @@ class ProductsFragment : Fragment(), ProfileManager.ProfileListener {
         setupProfileButton()
         setupBackButton()
         setupBackgroundDim()
+
     }
 
     private fun setupBackButton() {
@@ -142,8 +141,8 @@ class ProductsFragment : Fragment(), ProfileManager.ProfileListener {
 
     private fun setupRecyclerView() {
         adapter = ProductAdapter { product, newQuantity ->
-            val updatedProduct = product.copy(quantity = newQuantity)
-            viewModel.updateProduct(updatedProduct)
+            // Используем метод updateProductQuantity из ViewModel
+            viewModel.updateProductQuantity(product, newQuantity)
         }
 
         binding.productsRecyclerView.apply {
@@ -155,8 +154,17 @@ class ProductsFragment : Fragment(), ProfileManager.ProfileListener {
 
     private fun observeProducts() {
         lifecycleScope.launch {
-            viewModel.allProducts.collect { products ->
+            viewModel.allProducts.collect { products ->  // ← используем allProducts
                 adapter.submitList(products)
+
+                // Показываем/скрываем сообщение о пустом списке
+                if (products.isEmpty()) {
+                    binding.emptyState.visibility = View.VISIBLE
+                    binding.productsRecyclerView.visibility = View.GONE
+                } else {
+                    binding.emptyState.visibility = View.GONE
+                    binding.productsRecyclerView.visibility = View.VISIBLE
+                }
             }
         }
     }

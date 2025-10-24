@@ -2,19 +2,44 @@ package com.example.foodcare.data.repository
 
 import com.example.foodcare.data.dao.ProductDao
 import com.example.foodcare.data.model.Product
+import com.example.foodcare.data.sync.FirebaseSyncManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import javax.inject.Inject
 
-class ProductRepository(private val productDao: ProductDao) {
+class ProductRepository @Inject constructor(
+    private val productDao: ProductDao,
+    private val syncManager: FirebaseSyncManager
+) {
 
     fun getAllProducts(): Flow<List<Product>> = productDao.getAllProducts()
 
-    suspend fun addProduct(product: Product) = productDao.insertProduct(product)
+    suspend fun addProduct(product: Product) {
+        // Сохраняем локально с пометкой для синхронизации
+        val productToSave = product.copy(isDirty = true)
+        productDao.insertProduct(productToSave)
 
-    suspend fun deleteProduct(product: Product) = productDao.deleteProduct(product)
+        // Запускаем синхронизацию
+        syncManager.syncIfNeeded()
+    }
+
+    suspend fun deleteProduct(product: Product) {
+        if (product.firebaseId != null) {
+            // Помечаем для удаления и синхронизации
+            val deletedProduct = product.copy(isDeleted = true, isDirty = true)
+            productDao.updateProduct(deletedProduct)
+        } else {
+            // Просто удаляем локально (еще не синхронизирован)
+            productDao.deleteProduct(product)
+        }
+        syncManager.syncIfNeeded()
+    }
 
     suspend fun updateProduct(product: Product) {
-        productDao.updateProduct(product)
+        // Помечаем как измененное для синхронизации
+        val updatedProduct = product.copy(isDirty = true)
+        productDao.updateProduct(updatedProduct)
+        syncManager.syncIfNeeded()
     }
 
     suspend fun addSampleProducts() {
@@ -79,9 +104,33 @@ class ProductRepository(private val productDao: ProductDao) {
             Product(name = "Кофе", category = "Напитки", expirationDate = currentTime + 200 * dayInMillis, quantity = "250 г")
         )
 
+        // Добавляем продукты без пометки синхронизации (это тестовые данные)
         sampleProducts.forEach { product ->
             productDao.insertProduct(product)
         }
+
+        // Синхронизируем тестовые данные с Firebase
+        syncManager.syncIfNeeded()
+    }
+
+    // Дополнительные методы для удобства
+    suspend fun getProductsByCategory(category: String): List<Product> {
+        val allProducts = productDao.getAllProducts().first()
+        return allProducts.filter { it.category == category && !it.isDeleted }
+    }
+
+    suspend fun getExpiringSoonProducts(days: Int = 3): List<Product> {
+        val threshold = System.currentTimeMillis() + (days * 24 * 60 * 60 * 1000L)
+        val currentTime = System.currentTimeMillis()
+
+        val allProducts = productDao.getAllProducts().first()
+        return allProducts.filter { product ->
+            !product.isDeleted && product.expirationDate in (currentTime + 1)..threshold
+        }
+    }
+
+    suspend fun forceSync() {
+        syncManager.syncAllData()
     }
 
     // Дополнительный метод для очистки базы (если нужно)
