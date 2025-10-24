@@ -5,6 +5,10 @@
     <!-- Разрешения ТОЛЬКО здесь, перед application -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Дополнительные разрешения для камеры и фото (если нужно) -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:name=".FoodCareApplication"
@@ -47,6 +51,18 @@
         <activity
             android:name=".ui.main.MainActivity"
             android:exported="false" />
+
+        <!-- Add Product Activity -->
+        <activity
+            android:name=".ui.add_products.AddProductActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FoodCare" />
+
+        <!-- Profile Activity -->
+        <activity
+            android:name=".ui.profile.ProfileClass"
+            android:exported="false"
+            android:theme="@style/Theme.FoodCare" />
 
         <!-- Meta-data для шрифтов -->
         <meta-data

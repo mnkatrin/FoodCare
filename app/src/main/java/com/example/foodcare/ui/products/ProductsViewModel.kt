@@ -4,28 +4,58 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.foodcare.data.model.Product
 import com.example.foodcare.data.repository.ProductRepository
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class ProductsViewModel(private val repository: ProductRepository) : ViewModel() {
+class ProductsViewModel(
+    private val repository: ProductRepository
+) : ViewModel() {
 
-    // Сортируем продукты по сроку годности: от минимального к максимальному
-    val allProducts: Flow<List<Product>> = repository.getAllProducts().map { products ->
-        products.sortedBy { product ->
-            product.getDaysUntilExpiration() // Сортировка по возрастанию дней
+    private val _products = MutableStateFlow<List<Product>>(emptyList())
+    val products: StateFlow<List<Product>> = _products.asStateFlow()
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    init {
+        loadProducts()
+    }
+
+    fun loadProducts() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                repository.getAllProducts().collect { productsList ->
+                    _products.value = productsList
+                }
+            } finally {
+                _isLoading.value = false
+            }
         }
     }
 
-    init {
+    fun addSampleProducts() {
         viewModelScope.launch {
             repository.addSampleProducts()
         }
     }
 
-    fun addProduct(product: Product) {
+    fun updateProductQuantity(product: Product, newQuantity: String) {
         viewModelScope.launch {
-            repository.addProduct(product)
+            try {
+                // Парсим строку в Double
+                val quantityValue = newQuantity.replace("[^\\d.]".toRegex(), "").toDoubleOrNull() ?: 0.0
+
+                val updatedProduct = product.copy(
+                    quantity = quantityValue, // Передаем Double, а не String
+                    isDirty = true
+                )
+                repository.updateProduct(updatedProduct)
+            } catch (e: Exception) {
+                // Обработка ошибки парсинга
+            }
         }
     }
 
@@ -35,18 +65,16 @@ class ProductsViewModel(private val repository: ProductRepository) : ViewModel()
         }
     }
 
-    // Метод для обновления количества
-    fun updateProductQuantity(product: Product, newQuantity: String) {
+    fun addNewProduct(name: String, category: String, expirationDate: String, quantity: Double, unit: String) {
         viewModelScope.launch {
-            val updatedProduct = product.copy(quantity = newQuantity)
-            repository.updateProduct(updatedProduct)
-        }
-    }
-
-    // Метод для обновления продукта
-    fun updateProduct(product: Product) {
-        viewModelScope.launch {
-            repository.updateProduct(product)
+            val product = Product(
+                name = name,
+                category = category,
+                expirationDate = expirationDate,
+                quantity = quantity, // Уже Double
+                unit = unit
+            )
+            repository.addProduct(product)
         }
     }
 }

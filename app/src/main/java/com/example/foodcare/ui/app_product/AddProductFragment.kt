@@ -2,6 +2,7 @@ package com.example.foodcare.ui.app_product
 
 import android.app.DatePickerDialog
 import android.app.Dialog
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,6 +14,7 @@ import com.example.foodcare.R
 import com.example.foodcare.data.model.Product
 import com.example.foodcare.data.repository.ProductRepository
 import com.example.foodcare.databinding.FragmentAddProductBinding
+import com.example.foodcare.ui.add_products.AddProductActivity // Импорт активности добавления
 import com.example.foodcare.ui.profile.ProfileManager
 import com.google.android.material.textfield.TextInputEditText
 import java.text.SimpleDateFormat
@@ -85,6 +87,11 @@ class AddProductFragment : Fragment(), ProfileManager.ProfileListener {
             openCameraOrGallery()
         }
 
+        // Кнопка "Добавить продукт" - открывает активность с формой добавления
+        binding.addProductButton.setOnClickListener {
+            openAddProductActivity()
+        }
+
         // Кнопки добавления продуктов из списка
         binding.addProduct1.setOnClickListener {
             showExpirationDateDialog("Апельсиновый сок", "Напитки")
@@ -118,6 +125,12 @@ class AddProductFragment : Fragment(), ProfileManager.ProfileListener {
                 hideProfile()
             }
         }
+    }
+
+    // НОВЫЙ МЕТОД - открытие активности добавления продукта
+    private fun openAddProductActivity() {
+        val intent = Intent(requireContext(), AddProductActivity::class.java)
+        startActivity(intent)
     }
 
     private fun showExpirationDateDialog(productName: String, category: String) {
@@ -191,17 +204,14 @@ class AddProductFragment : Fragment(), ProfileManager.ProfileListener {
         productName: String,
         category: String,
         expirationDate: String,
-        quantity: String
+        quantity: String // Это строка в формате "1 кг", "500 г" и т.д.
     ) {
         try {
-            val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
-            val expirationDateObj = dateFormat.parse(expirationDate) ?: Date()
-
             val product = Product(
                 name = productName,
                 category = category,
-                expirationDate = expirationDateObj.time,
-                quantity = quantity
+                expirationDate = expirationDate,
+                quantity = 1.0 // Временно передаем 1.0 как Double
             )
 
             // Используем ViewModel для добавления продукта

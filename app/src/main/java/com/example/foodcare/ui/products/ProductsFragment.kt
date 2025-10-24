@@ -55,7 +55,6 @@ class ProductsFragment : Fragment(), ProfileManager.ProfileListener {
         setupProfileButton()
         setupBackButton()
         setupBackgroundDim()
-
     }
 
     private fun setupBackButton() {
@@ -154,7 +153,8 @@ class ProductsFragment : Fragment(), ProfileManager.ProfileListener {
 
     private fun observeProducts() {
         lifecycleScope.launch {
-            viewModel.allProducts.collect { products ->  // ← используем allProducts
+            // ИСПРАВЛЕНО: используем products вместо allProducts
+            viewModel.products.collect { products ->
                 adapter.submitList(products)
 
                 // Показываем/скрываем сообщение о пустом списке

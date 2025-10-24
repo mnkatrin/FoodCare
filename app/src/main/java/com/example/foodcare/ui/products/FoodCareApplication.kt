@@ -5,6 +5,9 @@ import com.example.foodcare.data.database.AppDatabase
 import com.example.foodcare.data.repository.ProductRepository
 import com.example.foodcare.data.sync.FirebaseSyncManager
 import com.google.firebase.FirebaseApp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class FoodCareApplication : Application() {
 
@@ -24,13 +27,14 @@ class FoodCareApplication : Application() {
         // Инициализация Firebase
         FirebaseApp.initializeApp(this)
 
-        // База данных инициализируется при первом обращении через lazy
-        // Можно добавить предзагрузку тестовых данных если нужно
-        preloadSampleData()
+        // Инициализация категорий при запуске приложения
+        initializeCategories()
     }
 
-    private fun preloadSampleData() {
-        // Опционально: предзагрузка тестовых данных при первом запуске
-        // Это выполнится в фоновом потоке при первом обращении к repository
+    private fun initializeCategories() {
+        // Инициализируем категории в фоновом потоке
+        CoroutineScope(Dispatchers.IO).launch {
+            productRepository.initializeCategories()
+        }
     }
 }

@@ -44,9 +44,9 @@ class ProductAdapter(
             // Форматируем срок годности
             val daysLeft = product.getDaysUntilExpiration()
             val expirationText = when {
-                daysLeft == 0L -> "Истекает сегодня"
-                daysLeft == 1L -> "Осталось: 1 день"
-                daysLeft < 5L -> "Осталось: $daysLeft дня"
+                daysLeft == 0 -> "Истекает сегодня"
+                daysLeft == 1 -> "Осталось: 1 день"
+                daysLeft < 5 -> "Осталось: $daysLeft дня"
                 else -> "Осталось: $daysLeft дней"
             }
             productExpiration.text = expirationText
@@ -70,68 +70,52 @@ class ProductAdapter(
                 }
             }
 
-            // Устанавливаем количество
-            productQuantity.text = product.quantity
+            // Устанавливаем количество - ИСПРАВЛЕНО: конвертируем Double в String
+            productQuantity.text = formatQuantityDisplay(product.quantity, product.unit)
 
             // Обработчики для кнопок +/-
             btnDecrease.setOnClickListener {
-                val (currentValue, unit) = parseQuantity(product.quantity)
+                val currentValue = product.quantity
+                val unit = product.unit
                 if (currentValue > getMinQuantity(unit)) {
-                    val newQuantity = formatQuantity(currentValue - getStep(unit), unit)
-                    onQuantityChanged(product, newQuantity)
+                    val newQuantity = currentValue - getStep(unit)
+                    onQuantityChanged(product.copy(quantity = newQuantity), formatQuantityDisplay(newQuantity, unit))
                 }
             }
 
             btnIncrease.setOnClickListener {
-                val (currentValue, unit) = parseQuantity(product.quantity)
-                val newQuantity = formatQuantity(currentValue + getStep(unit), unit)
-                onQuantityChanged(product, newQuantity)
+                val currentValue = product.quantity
+                val unit = product.unit
+                val newQuantity = currentValue + getStep(unit)
+                onQuantityChanged(product.copy(quantity = newQuantity), formatQuantityDisplay(newQuantity, unit))
             }
         }
 
         // Вспомогательные функции для работы с разными единицами
-        private fun parseQuantity(quantity: String): Pair<Double, String> {
-            return try {
-                val value = quantity.replace(" шт", "").replace(" л", "").replace(" мл", "")
-                    .replace(" г", "").replace(" кг", "").replace(" банки", "").trim()
-                val unit = when {
-                    quantity.contains("л") && !quantity.contains("мл") -> "л"
-                    quantity.contains("мл") -> "мл"
-                    quantity.contains("кг") -> "кг"
-                    quantity.contains("г") -> "г"
-                    quantity.contains("банки") -> "банки"
-                    else -> "шт"
-                }
-                Pair(value.toDouble(), unit)
-            } catch (e: Exception) {
-                Pair(1.0, "шт")
-            }
-        }
-
-        private fun formatQuantity(value: Double, unit: String): String {
+        private fun formatQuantityDisplay(value: Double, unit: String): String {
             return when (unit) {
                 "л", "кг" -> if (value == value.toInt().toDouble()) "${value.toInt()} $unit" else "$value $unit"
-                "мл", "г" -> "${value.toInt()} $unit" // для мл и г используем целые числа
+                "мл", "г" -> "${value.toInt()} $unit"
                 "банки" -> "${value.toInt()} банки"
-                else -> "${value.toInt()} шт"
+                else -> "${value.toInt()} $unit"
             }
         }
 
         private fun getMinQuantity(unit: String): Double {
             return when (unit) {
                 "л", "кг" -> 0.1
-                "мл", "г" -> 50.0 // минимально 50 мл/г
+                "мл", "г" -> 50.0
                 "банки" -> 1.0
-                else -> 1.0 // для штук
+                else -> 1.0
             }
         }
 
         private fun getStep(unit: String): Double {
             return when (unit) {
-                "л", "кг" -> 0.1 // шаг 100 мл для литров, 100 г для кг
-                "мл", "г" -> 50.0 // шаг 50 мл/г
+                "л", "кг" -> 0.1
+                "мл", "г" -> 50.0
                 "банки" -> 1.0
-                else -> 1.0 // для штук
+                else -> 1.0
             }
         }
     }

@@ -121,11 +121,17 @@ class FirebaseSyncManager @Inject constructor(
                         // Новый продукт из Firebase
                         productDao.insertProduct(firebaseProduct)
                         Timber.d("New product from Firebase: ${firebaseProduct.name}")
-                    } else if (firebaseProduct.lastSynced > existingProduct.lastSynced) {
-                        // Продукт из Firebase новее - обновляем локально
-                        val updatedProduct = firebaseProduct.copy(id = existingProduct.id)
-                        productDao.updateProduct(updatedProduct)
-                        Timber.d("Product updated from Firebase: ${firebaseProduct.name}")
+                    } else {
+                        // Сравниваем временные метки с обработкой nullable
+                        val firebaseSyncTime = firebaseProduct.lastSynced ?: 0L
+                        val existingSyncTime = existingProduct.lastSynced ?: 0L
+
+                        if (firebaseSyncTime > existingSyncTime) {
+                            // Продукт из Firebase новее - обновляем локально
+                            val updatedProduct = firebaseProduct.copy(id = existingProduct.id)
+                            productDao.updateProduct(updatedProduct)
+                            Timber.d("Product updated from Firebase: ${firebaseProduct.name}")
+                        }
                     }
                 } catch (e: Exception) {
                     Timber.e(e, "Failed to process Firebase product: ${firebaseProduct.name}")
@@ -208,23 +214,30 @@ private fun Product.toFirebaseMap(): Map<String, Any> {
         "category" to category,
         "expirationDate" to expirationDate,
         "quantity" to quantity,
-        "imageUri" to (imageUri ?: ""),
+        "unit" to unit,
+        "barcode" to barcode,
+        "imageUrl" to imageUrl,
+        "createdAt" to createdAt,
         "lastSynced" to System.currentTimeMillis(),
-        "createdAt" to System.currentTimeMillis(),
-        "isDeleted" to isDeleted
+        "isDeleted" to isDeleted,
+        "isDirty" to isDirty
     )
 }
 
 private fun com.google.firebase.firestore.DocumentSnapshot.toProduct(firebaseId: String): Product {
     return Product(
-        id = 0, // Будет сгенерирован автоматически в Room
-        firebaseId = firebaseId,
+        id = "", // Будет сгенерирован в Room
         name = getString("name") ?: "",
         category = getString("category") ?: "",
-        expirationDate = getLong("expirationDate") ?: 0,
-        quantity = getString("quantity") ?: "1 шт.",
-        imageUri = getString("imageUri"),
-        lastSynced = getLong("lastSynced") ?: 0,
+        expirationDate = getString("expirationDate") ?: "",
+        quantity = getDouble("quantity") ?: 0.0,
+        unit = getString("unit") ?: "",
+        barcode = getString("barcode") ?: "",
+        imageUrl = getString("imageUrl") ?: "",
+        createdAt = getLong("createdAt") ?: System.currentTimeMillis(),
+        isDirty = getBoolean("isDirty") ?: false,
+        firebaseId = firebaseId,
+        lastSynced = getLong("lastSynced"),
         isDeleted = getBoolean("isDeleted") ?: false
     )
 }

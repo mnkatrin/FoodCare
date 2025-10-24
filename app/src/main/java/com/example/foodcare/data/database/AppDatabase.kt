@@ -3,11 +3,12 @@ package com.example.foodcare.data.database
 import android.content.Context
 import androidx.room.*
 import com.example.foodcare.data.dao.ProductDao
+import com.example.foodcare.data.model.Category
 import com.example.foodcare.data.model.Product
 
 @Database(
-    entities = [Product::class],
-    version = 3,
+    entities = [Product::class, Category::class],
+    version = 4,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -23,7 +24,7 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "foodcare_database"
-                ).fallbackToDestructiveMigration() // Простое решение - удаляет старую БД
+                ).fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
                 instance

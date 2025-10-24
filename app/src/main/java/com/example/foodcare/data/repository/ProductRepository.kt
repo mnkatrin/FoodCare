@@ -1,6 +1,7 @@
 package com.example.foodcare.data.repository
 
 import com.example.foodcare.data.dao.ProductDao
+import com.example.foodcare.data.model.Category
 import com.example.foodcare.data.model.Product
 import com.example.foodcare.data.sync.FirebaseSyncManager
 import kotlinx.coroutines.flow.Flow
@@ -12,6 +13,7 @@ class ProductRepository @Inject constructor(
     private val syncManager: FirebaseSyncManager
 ) {
 
+    // МЕТОДЫ ДЛЯ ПРОДУКТОВ
     fun getAllProducts(): Flow<List<Product>> = productDao.getAllProducts()
 
     suspend fun addProduct(product: Product) {
@@ -42,6 +44,7 @@ class ProductRepository @Inject constructor(
         syncManager.syncIfNeeded()
     }
 
+    // ДОБАВЬТЕ ЭТОТ МЕТОД ДЛЯ ТЕСТОВЫХ ДАННЫХ
     suspend fun addSampleProducts() {
         // Проверим, есть ли уже продукты
         val existingProducts = productDao.getAllProducts().first()
@@ -49,71 +52,90 @@ class ProductRepository @Inject constructor(
             return // Продукты уже есть, не добавляем снова
         }
 
-        val currentTime = System.currentTimeMillis()
-        val dayInMillis = 24 * 60 * 60 * 1000L
-
         val sampleProducts = listOf(
-            // Молочные продукты - литры/миллилитры
-            Product(name = "Молоко", category = "Молочные продукты", expirationDate = currentTime + 2 * dayInMillis, quantity = "1 л"),
-            Product(name = "Йогурт", category = "Молочные продукты", expirationDate = currentTime + 3 * dayInMillis, quantity = "4 шт"),
-            Product(name = "Сыр", category = "Молочные продукты", expirationDate = currentTime + 5 * dayInMillis, quantity = "200 г"),
-            Product(name = "Творог", category = "Молочные продукты", expirationDate = currentTime + 4 * dayInMillis, quantity = "400 г"),
-            Product(name = "Сметана", category = "Молочные продукты", expirationDate = currentTime + 3 * dayInMillis, quantity = "300 г"),
-            Product(name = "Кефир", category = "Молочные продукты", expirationDate = currentTime + 2 * dayInMillis, quantity = "1 л"),
-            Product(name = "Сливки", category = "Молочные продукты", expirationDate = currentTime + 3 * dayInMillis, quantity = "500 мл"),
-
-            // Хлебобулочные - штуки
-            Product(name = "Хлеб", category = "Хлебобулочные", expirationDate = currentTime + 2 * dayInMillis, quantity = "1 шт"),
-            Product(name = "Булочки", category = "Хлебобулочные", expirationDate = currentTime + 3 * dayInMillis, quantity = "6 шт"),
-            Product(name = "Печенье", category = "Хлебобулочные", expirationDate = currentTime + 15 * dayInMillis, quantity = "1 шт"),
-            Product(name = "Круассан", category = "Хлебобулочные", expirationDate = currentTime + 2 * dayInMillis, quantity = "2 шт"),
-
-            // Яйца - штуки
-            Product(name = "Яйца", category = "Яйца", expirationDate = currentTime + 14 * dayInMillis, quantity = "10 шт"),
-
-            // Фрукты - штуки/килограммы
-            Product(name = "Яблоки", category = "Фрукты", expirationDate = currentTime + 10 * dayInMillis, quantity = "1 кг"),
-            Product(name = "Бананы", category = "Фрукты", expirationDate = currentTime + 5 * dayInMillis, quantity = "3 шт"),
-            Product(name = "Апельсины", category = "Фрукты", expirationDate = currentTime + 12 * dayInMillis, quantity = "4 шт"),
-            Product(name = "Груши", category = "Фрукты", expirationDate = currentTime + 8 * dayInMillis, quantity = "2 шт"),
-            Product(name = "Виноград", category = "Фрукты", expirationDate = currentTime + 7 * dayInMillis, quantity = "500 г"),
-
-            // Овощи - штуки/килограммы
-            Product(name = "Морковь", category = "Овощи", expirationDate = currentTime + 8 * dayInMillis, quantity = "3 шт"),
-            Product(name = "Картофель", category = "Овощи", expirationDate = currentTime + 20 * dayInMillis, quantity = "2 кг"),
-            Product(name = "Лук", category = "Овощи", expirationDate = currentTime + 15 * dayInMillis, quantity = "5 шт"),
-            Product(name = "Помидоры", category = "Овощи", expirationDate = currentTime + 7 * dayInMillis, quantity = "4 шт"),
-            Product(name = "Огурцы", category = "Овощи", expirationDate = currentTime + 6 * dayInMillis, quantity = "3 шт"),
-            Product(name = "Капуста", category = "Овощи", expirationDate = currentTime + 12 * dayInMillis, quantity = "1 шт"),
-
-            // Консервы - штуки
-            Product(name = "Консервы", category = "Консервы", expirationDate = currentTime + 365 * dayInMillis, quantity = "2 шт"),
-
-            // Бакалея - граммы/килограммы
-            Product(name = "Макароны", category = "Бакалея", expirationDate = currentTime + 180 * dayInMillis, quantity = "400 г"),
-            Product(name = "Рис", category = "Бакалея", expirationDate = currentTime + 200 * dayInMillis, quantity = "1 кг"),
-            Product(name = "Гречка", category = "Бакалея", expirationDate = currentTime + 190 * dayInMillis, quantity = "800 г"),
-            Product(name = "Овсянка", category = "Бакалея", expirationDate = currentTime + 150 * dayInMillis, quantity = "500 г"),
-            Product(name = "Мука", category = "Бакалея", expirationDate = currentTime + 120 * dayInMillis, quantity = "1 кг"),
-            Product(name = "Сахар", category = "Бакалея", expirationDate = currentTime + 300 * dayInMillis, quantity = "1 кг"),
-
-            // Напитки - литры/миллилитры
-            Product(name = "Сок", category = "Напитки", expirationDate = currentTime + 30 * dayInMillis, quantity = "1 л"),
-            Product(name = "Вода", category = "Напитки", expirationDate = currentTime + 90 * dayInMillis, quantity = "1.5 л"),
-            Product(name = "Чай", category = "Напитки", expirationDate = currentTime + 180 * dayInMillis, quantity = "100 г"),
-            Product(name = "Кофе", category = "Напитки", expirationDate = currentTime + 200 * dayInMillis, quantity = "250 г")
+            Product(
+                name = "Молоко",
+                category = "Молочные продукты",
+                expirationDate = "25.12.2024",
+                quantity = 1.0,
+                unit = "л"
+            ),
+            Product(
+                name = "Хлеб",
+                category = "Хлебобулочные изделия",
+                expirationDate = "20.12.2024",
+                quantity = 1.0,
+                unit = "шт"
+            ),
+            Product(
+                name = "Яйца",
+                category = "Яйца",
+                expirationDate = "30.12.2024",
+                quantity = 10.0,
+                unit = "шт"
+            ),
+            Product(
+                name = "Яблоки",
+                category = "Фрукты",
+                expirationDate = "28.12.2024",
+                quantity = 1.5,
+                unit = "кг"
+            ),
+            Product(
+                name = "Апельсиновый сок",
+                category = "Напитки",
+                expirationDate = "15.01.2025",
+                quantity = 1.0,
+                unit = "л"
+            ),
+            Product(
+                name = "Куриное филе",
+                category = "Мясо, птица",
+                expirationDate = "22.12.2024",
+                quantity = 0.5,
+                unit = "кг"
+            )
         )
 
-        // Добавляем продукты без пометки синхронизации (это тестовые данные)
         sampleProducts.forEach { product ->
-            productDao.insertProduct(product)
+            productDao.insertProduct(product.copy(isDirty = true))
         }
 
-        // Синхронизируем тестовые данные с Firebase
+        // Синхронизируем тестовые данные
         syncManager.syncIfNeeded()
     }
 
-    // Дополнительные методы для удобства
+    // МЕТОДЫ ДЛЯ КАТЕГОРИЙ
+    fun getAllCategories(): Flow<List<Category>> = productDao.getAllCategories()
+
+    suspend fun initializeCategories() {
+        // Проверим, есть ли уже категории
+        val existingCategories = productDao.getAllCategories().first()
+        if (existingCategories.isNotEmpty()) {
+            return // Категории уже есть, не добавляем снова
+        }
+
+        val defaultCategories = listOf(
+            Category("1", "Молочные продукты"),
+            Category("2", "Мясо, птица"),
+            Category("3", "Овощи"),
+            Category("4", "Фрукты"),
+            Category("5", "Напитки"),
+            Category("6", "Хлебобулочные изделия"),
+            Category("7", "Бакалея"),
+            Category("8", "Замороженные продукты"),
+            Category("9", "Сладости"),
+            Category("10", "Яйца"),
+            Category("11", "Консервы"),
+            Category("12", "Прочее")
+        )
+
+        defaultCategories.forEach { category ->
+            productDao.insertCategory(category)
+        }
+    }
+
+    // ДОПОЛНИТЕЛЬНЫЕ МЕТОДЫ ДЛЯ УДОБСТВА
     suspend fun getProductsByCategory(category: String): List<Product> {
         val allProducts = productDao.getAllProducts().first()
         return allProducts.filter { it.category == category && !it.isDeleted }
@@ -125,7 +147,7 @@ class ProductRepository @Inject constructor(
 
         val allProducts = productDao.getAllProducts().first()
         return allProducts.filter { product ->
-            !product.isDeleted && product.expirationDate in (currentTime + 1)..threshold
+            !product.isDeleted && product.expirationDate.toLongOrNull() in (currentTime + 1)..threshold
         }
     }
 
