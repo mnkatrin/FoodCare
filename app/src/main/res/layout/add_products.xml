@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="#77B9BC"
     android:backgroundTint="#E6FDFF"
-    android:paddingTop="5dp">
+    android:paddingTop="0dp">
 
     <!-- Food Care заголовок -->
     <LinearLayout
@@ -15,7 +15,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingStart="15dp"
-        android:paddingTop="10dp"
+        android:paddingTop="15dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -42,7 +42,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="3dp"
-        android:layout_marginTop="56dp"
+        android:layout_marginTop="15dp"
         android:backgroundTint="#00B61515"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -53,7 +53,7 @@
         android:id="@+id/addProductTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="10dp"
         android:fontFamily="@font/mulish_bold"
         android:text="Добавить продукт"
         android:textColor="#000000"
@@ -65,14 +65,16 @@
     <!-- Основной контейнер с полями ввода -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/inputCard"
-        android:layout_width="363dp"
-        android:layout_height="400dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="20dp"
         android:layout_marginEnd="20dp"
+        android:layout_marginBottom="20dp"
         app:cardBackgroundColor="#FFFFFF"
         app:cardCornerRadius="20dp"
         app:cardElevation="4dp"
+        app:layout_constraintBottom_toTopOf="@+id/divider"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/addProductTitle">
@@ -81,7 +83,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:padding="24dp">
+            android:padding="20dp">
 
             <!-- Название продукта -->
             <TextView
@@ -97,7 +99,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="12dp"
                 app:boxBackgroundMode="outline"
                 app:boxCornerRadiusBottomEnd="12dp"
                 app:boxCornerRadiusBottomStart="12dp"
@@ -113,7 +115,7 @@
                     android:hint="Введите название"
                     android:imeOptions="actionNext"
                     android:maxLines="1"
-                    android:padding="16dp"
+                    android:padding="12dp"
                     android:textColor="#000000"
                     android:textColorHint="#999999"
                     android:textSize="16sp" />
@@ -134,7 +136,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="12dp"
                 app:boxBackgroundMode="outline"
                 app:boxCornerRadiusBottomEnd="12dp"
                 app:boxCornerRadiusBottomStart="12dp"
@@ -150,7 +152,7 @@
                     android:hint="Выберите категорию"
                     android:imeOptions="actionNext"
                     android:maxLines="1"
-                    android:padding="16dp"
+                    android:padding="12dp"
                     android:textColor="#000000"
                     android:textColorHint="#999999"
                     android:textSize="16sp" />
@@ -171,7 +173,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="12dp"
                 app:boxBackgroundMode="outline"
                 app:boxCornerRadiusBottomEnd="12dp"
                 app:boxCornerRadiusBottomStart="12dp"
@@ -188,7 +190,7 @@
                     android:imeOptions="actionNext"
                     android:inputType="date"
                     android:maxLines="1"
-                    android:padding="16dp"
+                    android:padding="12dp"
                     android:textColor="#000000"
                     android:textColorHint="#999999"
                     android:textSize="16sp" />
@@ -221,7 +223,7 @@
                     <!-- Контейнер для счетчика количества -->
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="55dp"
+                        android:layout_height="50dp"
                         android:layout_marginTop="8dp"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
@@ -231,12 +233,12 @@
                         <!-- Кнопка уменьшения -->
                         <Button
                             android:id="@+id/decreaseQuantityButton"
-                            android:layout_width="45dp"
-                            android:layout_height="45dp"
+                            android:layout_width="42dp"
+                            android:layout_height="42dp"
                             android:background="@drawable/quantity_button_background"
                             android:text="-"
                             android:textColor="#2DC0FF"
-                            android:textSize="20sp"
+                            android:textSize="18sp"
                             android:textStyle="bold"
                             android:stateListAnimator="@null" />
 
@@ -249,19 +251,19 @@
                             android:gravity="center"
                             android:text="1"
                             android:textColor="#000000"
-                            android:textSize="18sp"
+                            android:textSize="16sp"
                             android:textStyle="bold"
                             android:padding="8dp" />
 
                         <!-- Кнопка увеличения -->
                         <Button
                             android:id="@+id/increaseQuantityButton"
-                            android:layout_width="45dp"
-                            android:layout_height="45dp"
+                            android:layout_width="42dp"
+                            android:layout_height="42dp"
                             android:background="@drawable/quantity_button_background"
                             android:text="+"
                             android:textColor="#2DC0FF"
-                            android:textSize="20sp"
+                            android:textSize="18sp"
                             android:textStyle="bold"
                             android:stateListAnimator="@null" />
 
@@ -305,7 +307,7 @@
                             android:hint="гр/мл/кг/шт"
                             android:imeOptions="actionDone"
                             android:maxLines="1"
-                            android:padding="16dp"
+                            android:padding="12dp"
                             android:textColor="#000000"
                             android:textColorHint="#999999"
                             android:textSize="16sp" />
@@ -326,64 +328,73 @@
         android:layout_width="0dp"
         android:layout_height="1dp"
         android:layout_marginStart="40dp"
-        android:layout_marginTop="450dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="40dp"
+        android:layout_marginBottom="16dp"
         android:background="#CCCCCC"
+        app:layout_constraintBottom_toTopOf="@+id/addBarcodeButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/inputCard" />
 
     <!-- Раздел "Добавить штрих-код" -->
     <Button
         android:id="@+id/addBarcodeButton"
-        android:layout_width="361dp"
-        android:layout_height="57dp"
-        android:layout_marginTop="470dp"
+        android:layout_width="0dp"
+        android:layout_height="55dp"
+        android:layout_marginStart="40dp"
+        android:layout_marginEnd="40dp"
+        android:layout_marginBottom="16dp"
         android:fontFamily="@font/mulish_bold"
         android:text="Добавить штрих-код"
         android:textColor="#000000"
-        android:textSize="18sp"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/addPhotoButtonMain"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/divider" />
 
     <!-- Контейнер для добавления фотографии -->
     <Button
         android:id="@+id/addPhotoButtonMain"
-        android:layout_width="361dp"
-        android:layout_height="60dp"
-        android:layout_marginTop="540dp"
+        android:layout_width="0dp"
+        android:layout_height="55dp"
+        android:layout_marginStart="40dp"
+        android:layout_marginEnd="40dp"
+        android:layout_marginBottom="16dp"
         android:fontFamily="@font/mulish_bold"
         android:text="Добавить фотографию"
         android:textColor="#FFFFFF"
-        android:textSize="18sp"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/saveButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/addBarcodeButton" />
 
     <!-- Кнопка сохранения -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/saveButton"
-        android:layout_width="361dp"
-        android:layout_height="60dp"
+        android:layout_width="0dp"
+        android:layout_height="55dp"
         android:layout_marginStart="40dp"
-        android:layout_marginTop="620dp"
         android:layout_marginEnd="40dp"
+        android:layout_marginBottom="20dp"
         android:backgroundTint="#2DC0FF"
         android:fontFamily="@font/mulish_bold"
         android:text="Сохранить продукт"
         android:textColor="#FFFFFF"
-        android:textSize="18sp"
+        android:textSize="16sp"
         app:cornerRadius="25dp"
+        app:layout_constraintBottom_toTopOf="@+id/bottomFrame"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/addPhotoButtonMain" />
 
     <!-- FrameLayout как НАЛОЖЕНИЕ -->
     <FrameLayout
         android:id="@+id/bottomFrame"
         android:layout_width="0dp"
-        android:layout_height="193dp"
+        android:layout_height="180dp"
         android:alpha="0.9"
         android:background="@drawable/rectangle_3"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -392,8 +403,8 @@
 
         <ImageView
             android:id="@+id/imageView"
-            android:layout_width="397dp"
-            android:layout_height="153dp"
+            android:layout_width="match_parent"
+            android:layout_height="140dp"
             android:layout_gravity="center"
             android:scaleType="fitEnd"
             app:srcCompat="@drawable/frame_180" />
@@ -416,11 +427,10 @@
         <!-- Центральная кнопка добавления по фото -->
         <ImageButton
             android:id="@+id/addPhotoButtonBottom"
-            android:layout_width="83dp"
-            android:layout_height="84dp"
+            android:layout_width="75dp"
+            android:layout_height="75dp"
             android:layout_gravity="center"
-            android:layout_marginStart="0dp"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="25dp"
             android:background="@drawable/frame_47417__1_" />
 
         <!-- Дополнительные кнопки как в оригинале -->
@@ -473,11 +483,7 @@
             android:background="#80000000"
             android:visibility="gone"
             android:clickable="true"
-            android:focusable="true"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:focusable="true" />
 
     </FrameLayout>
 

@@ -47,11 +47,8 @@ class AddProductActivity : AppCompatActivity(), ProfileManager.ProfileListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // ВКЛЮЧАЕМ ПОЛНОЭКРАННЫЙ РЕЖИМ
-        window.setFlags(
-            WindowManager.LayoutParams.FLAG_FULLSCREEN,
-            WindowManager.LayoutParams.FLAG_FULLSCREEN
-        )
+        // ПОЛНОЭКРАННЫЙ РЕЖИМ
+        makeFullScreen()
 
         binding = AddProductsBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -65,27 +62,37 @@ class AddProductActivity : AppCompatActivity(), ProfileManager.ProfileListener {
         setupBackgroundDim()
         setupCategorySelection()
         setupQuantitySelector()
-        setupUnitSelection() // ДОБАВЛЯЕМ ВЫБОР ЕДИНИЦ
+        setupUnitSelection()
+    }
+
+    private fun makeFullScreen() {
+        // Убираем статус бар и навигационную панель
+        window.decorView.systemUiVisibility = (
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        or View.SYSTEM_UI_FLAG_FULLSCREEN
+                        or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                )
+
+        // Для новых версий Android
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+        )
     }
 
     private fun setupCategorySelection() {
-        // Обработчик клика на поле категории
         binding.categoryEditText.setOnClickListener {
             showCategorySelectionDialog()
         }
-
-        // Запрещаем ручной ввод - только выбор из списка
         binding.categoryEditText.isFocusable = false
         binding.categoryEditText.isClickable = true
     }
 
     private fun setupUnitSelection() {
-        // Обработчик клика на поле единиц измерения
         binding.unitEditText.setOnClickListener {
             showUnitSelectionDialog()
         }
-
-        // Запрещаем ручной ввод - только выбор из списка
         binding.unitEditText.isFocusable = false
         binding.unitEditText.isClickable = true
     }
@@ -99,18 +106,15 @@ class AddProductActivity : AppCompatActivity(), ProfileManager.ProfileListener {
         val searchEditText = dialogView.findViewById<android.widget.EditText>(R.id.searchEditText)
         val closeButton = dialogView.findViewById<android.widget.Button>(R.id.closeButton)
 
-        // Создаем адаптер для списка категорий
         val adapter = android.widget.ArrayAdapter(this, android.R.layout.simple_list_item_1, categories)
         categoryListView.adapter = adapter
 
-        // Обработчик выбора категории
         categoryListView.setOnItemClickListener { parent, view, position, id ->
             val selectedCategory = adapter.getItem(position)
             binding.categoryEditText.setText(selectedCategory)
             dialog.dismiss()
         }
 
-        // Поиск по категориям
         searchEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -132,7 +136,6 @@ class AddProductActivity : AppCompatActivity(), ProfileManager.ProfileListener {
             }
         })
 
-        // Кнопка закрытия
         closeButton.setOnClickListener {
             dialog.dismiss()
         }
@@ -141,30 +144,18 @@ class AddProductActivity : AppCompatActivity(), ProfileManager.ProfileListener {
     }
 
     private fun showUnitSelectionDialog() {
-        val dialog = BottomSheetDialog(this)
-        val dialogView = layoutInflater.inflate(R.layout.dialog_unit_selection, null)
-        dialog.setContentView(dialogView)
-
-        val unitListView = dialogView.findViewById<android.widget.ListView>(R.id.unitListView)
-        val closeButton = dialogView.findViewById<android.widget.Button>(R.id.closeButton)
-
-        // Создаем адаптер для списка единиц измерения
-        val adapter = android.widget.ArrayAdapter(this, android.R.layout.simple_list_item_1, units)
-        unitListView.adapter = adapter
-
-        // Обработчик выбора единицы
-        unitListView.setOnItemClickListener { parent, view, position, id ->
-            val selectedUnit = adapter.getItem(position)
+        // Временное решение с AlertDialog
+        val builder = android.app.AlertDialog.Builder(this)
+        builder.setTitle("Выберите единицу измерения")
+        builder.setItems(units.toTypedArray()) { dialog, which ->
+            val selectedUnit = units[which]
             binding.unitEditText.setText(selectedUnit)
             dialog.dismiss()
         }
-
-        // Кнопка закрытия
-        closeButton.setOnClickListener {
+        builder.setNegativeButton("Закрыть") { dialog, _ ->
             dialog.dismiss()
         }
-
-        dialog.show()
+        builder.show()
     }
 
     private fun setupQuantitySelector() {
@@ -182,19 +173,6 @@ class AddProductActivity : AppCompatActivity(), ProfileManager.ProfileListener {
             }
         }
 
-        // Долгое нажатие для быстрого сброса/установки
-        binding.decreaseQuantityButton.setOnLongClickListener {
-            currentQuantity = 1
-            updateQuantityDisplay()
-            true
-        }
-
-        binding.increaseQuantityButton.setOnLongClickListener {
-            currentQuantity = 10
-            updateQuantityDisplay()
-            true
-        }
-
         updateQuantityDisplay()
     }
 
@@ -202,7 +180,6 @@ class AddProductActivity : AppCompatActivity(), ProfileManager.ProfileListener {
         binding.quantityTextView.text = currentQuantity.toString()
         binding.decreaseQuantityButton.isEnabled = currentQuantity > 1
 
-        // Визуальная обратная связь
         if (currentQuantity == 1) {
             binding.decreaseQuantityButton.alpha = 0.5f
         } else {
@@ -211,42 +188,34 @@ class AddProductActivity : AppCompatActivity(), ProfileManager.ProfileListener {
     }
 
     private fun setupClickListeners() {
-        // Кнопка сохранения продукта
         binding.saveButton.setOnClickListener {
             saveProduct()
         }
 
-        // Кнопка назад
         binding.backButton.setOnClickListener {
             finish()
         }
 
-        // Кнопка профиля
         binding.profileButton.setOnClickListener {
             showProfile()
         }
 
-        // Кнопка добавления штрих-кода
         binding.addBarcodeButton.setOnClickListener {
             openBarcodeScanner()
         }
 
-        // Кнопка добавления фотографии
         binding.addPhotoButtonMain.setOnClickListener {
             openCamera()
         }
 
-        // Центральная кнопка добавления по фото в нижней панели
         binding.addPhotoButtonBottom.setOnClickListener {
             openCamera()
         }
 
-        // Обработчик для выбора даты
         binding.expiryDateEditText.setOnClickListener {
             showDatePicker()
         }
 
-        // Дополнительные кнопки из нижней панели
         binding.buttonList.setOnClickListener {
             finish()
         }
@@ -261,7 +230,6 @@ class AddProductActivity : AppCompatActivity(), ProfileManager.ProfileListener {
     }
 
     private fun showDatePicker() {
-        // TODO: Реализовать выбор даты
         android.widget.Toast.makeText(this, "Выбор даты", android.widget.Toast.LENGTH_SHORT).show()
     }
 
@@ -283,7 +251,6 @@ class AddProductActivity : AppCompatActivity(), ProfileManager.ProfileListener {
             return
         }
 
-        // TODO: Сохранение продукта через ViewModel
         android.widget.Toast.makeText(this, "Продукт сохранен: $productName\nКоличество: $quantity $unit", android.widget.Toast.LENGTH_LONG).show()
         finish()
     }
@@ -294,6 +261,9 @@ class AddProductActivity : AppCompatActivity(), ProfileManager.ProfileListener {
         binding.backgroundDim.isClickable = true
         isProfileShowing = true
         setOtherElementsEnabled(false)
+
+        // Блокируем прокрутку основного контента
+        binding.main.isEnabled = false
     }
 
     private fun hideProfile() {
@@ -302,23 +272,30 @@ class AddProductActivity : AppCompatActivity(), ProfileManager.ProfileListener {
         binding.backgroundDim.isClickable = false
         isProfileShowing = false
         setOtherElementsEnabled(true)
+
+        // Разблокируем основной контент
+        binding.main.isEnabled = true
     }
 
     private fun setOtherElementsEnabled(enabled: Boolean) {
-        binding.backButton.isEnabled = enabled
-        binding.saveButton.isEnabled = enabled
-        binding.addBarcodeButton.isEnabled = enabled
-        binding.addPhotoButtonMain.isEnabled = enabled
-        binding.addPhotoButtonBottom.isEnabled = enabled
-        binding.buttonList.isEnabled = enabled
-        binding.buttonFridge.isEnabled = enabled
-        binding.buttonRecipes.isEnabled = enabled
-        binding.productNameEditText.isEnabled = enabled
-        binding.categoryEditText.isEnabled = enabled
-        binding.expiryDateEditText.isEnabled = enabled
-        binding.unitEditText.isEnabled = enabled
-        binding.decreaseQuantityButton.isEnabled = enabled
-        binding.increaseQuantityButton.isEnabled = enabled
+        val elements = arrayOf(
+            binding.backButton,
+            binding.saveButton,
+            binding.addBarcodeButton,
+            binding.addPhotoButtonMain,
+            binding.addPhotoButtonBottom,
+            binding.buttonList,
+            binding.buttonFridge,
+            binding.buttonRecipes,
+            binding.productNameEditText,
+            binding.categoryEditText,
+            binding.expiryDateEditText,
+            binding.unitEditText,
+            binding.decreaseQuantityButton,
+            binding.increaseQuantityButton
+        )
+
+        elements.forEach { it?.isEnabled = enabled }
     }
 
     private fun openBarcodeScanner() {
@@ -336,6 +313,7 @@ class AddProductActivity : AppCompatActivity(), ProfileManager.ProfileListener {
         binding.backgroundDim.isClickable = false
         isProfileShowing = false
         setOtherElementsEnabled(true)
+        binding.main.isEnabled = true
     }
 
     private fun performLogout() {
