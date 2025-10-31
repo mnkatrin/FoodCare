@@ -13,44 +13,40 @@ class ProductRepository @Inject constructor(
     private val syncManager: FirebaseSyncManager
 ) {
 
-    // МЕТОДЫ ДЛЯ ПРОДУКТОВ
+    // СУЩЕСТВУЮЩИЕ МЕТОДЫ
     fun getAllProducts(): Flow<List<Product>> = productDao.getAllProducts()
 
     suspend fun addProduct(product: Product) {
-        // Сохраняем локально с пометкой для синхронизации
         val productToSave = product.copy(isDirty = true)
         productDao.insertProduct(productToSave)
-
-        // Запускаем синхронизацию
         syncManager.syncIfNeeded()
     }
 
     suspend fun deleteProduct(product: Product) {
         if (product.firebaseId != null) {
-            // Помечаем для удаления и синхронизации
             val deletedProduct = product.copy(isDeleted = true, isDirty = true)
             productDao.updateProduct(deletedProduct)
         } else {
-            // Просто удаляем локально (еще не синхронизирован)
             productDao.deleteProduct(product)
         }
         syncManager.syncIfNeeded()
     }
 
     suspend fun updateProduct(product: Product) {
-        // Помечаем как измененное для синхронизации
         val updatedProduct = product.copy(isDirty = true)
         productDao.updateProduct(updatedProduct)
         syncManager.syncIfNeeded()
     }
 
-    // ДОБАВЬТЕ ЭТОТ МЕТОД ДЛЯ ТЕСТОВЫХ ДАННЫХ
+    // ОБНОВЛЕННЫЙ МЕТОД - добавляем userId к примерам продуктов
     suspend fun addSampleProducts() {
-        // Проверим, есть ли уже продукты
         val existingProducts = productDao.getAllProducts().first()
         if (existingProducts.isNotEmpty()) {
-            return // Продукты уже есть, не добавляем снова
+            return
         }
+
+        // Для примеров продуктов используем специальный userId
+        val sampleUserId = "sample_user"
 
         val sampleProducts = listOf(
             Product(
@@ -58,61 +54,69 @@ class ProductRepository @Inject constructor(
                 category = "Молочные продукты",
                 expirationDate = "25.12.2024",
                 quantity = 1.0,
-                unit = "л"
+                unit = "л",
+                isMyProduct = true,
+                userId = sampleUserId
             ),
             Product(
                 name = "Хлеб",
                 category = "Хлебобулочные изделия",
                 expirationDate = "20.12.2024",
                 quantity = 1.0,
-                unit = "шт"
+                unit = "шт",
+                isMyProduct = true,
+                userId = sampleUserId
             ),
             Product(
                 name = "Яйца",
                 category = "Яйца",
                 expirationDate = "30.12.2024",
                 quantity = 10.0,
-                unit = "шт"
+                unit = "шт",
+                isMyProduct = true,
+                userId = sampleUserId
             ),
             Product(
                 name = "Яблоки",
                 category = "Фрукты",
                 expirationDate = "28.12.2024",
                 quantity = 1.5,
-                unit = "кг"
+                unit = "кг",
+                isMyProduct = true,
+                userId = sampleUserId
             ),
             Product(
                 name = "Апельсиновый сок",
                 category = "Напитки",
                 expirationDate = "15.01.2025",
                 quantity = 1.0,
-                unit = "л"
+                unit = "л",
+                isMyProduct = true,
+                userId = sampleUserId
             ),
             Product(
                 name = "Куриное филе",
                 category = "Мясо, птица",
                 expirationDate = "22.12.2024",
                 quantity = 0.5,
-                unit = "кг"
+                unit = "кг",
+                isMyProduct = true,
+                userId = sampleUserId
             )
         )
 
         sampleProducts.forEach { product ->
             productDao.insertProduct(product.copy(isDirty = true))
         }
-
-        // Синхронизируем тестовые данные
         syncManager.syncIfNeeded()
     }
 
-    // МЕТОДЫ ДЛЯ КАТЕГОРИЙ
     fun getAllCategories(): Flow<List<Category>> = productDao.getAllCategories()
 
     suspend fun initializeCategories() {
-        // Проверим, есть ли уже категории
         val existingCategories = productDao.getAllCategories().first()
         if (existingCategories.isNotEmpty()) {
-            return // Категории уже есть, не добавляем снова
+            return
         }
 
         val defaultCategories = listOf(
@@ -135,19 +139,15 @@ class ProductRepository @Inject constructor(
         }
     }
 
-    // ДОПОЛНИТЕЛЬНЫЕ МЕТОДЫ ДЛЯ УДОБСТВА
     suspend fun getProductsByCategory(category: String): List<Product> {
         val allProducts = productDao.getAllProducts().first()
         return allProducts.filter { it.category == category && !it.isDeleted }
     }
 
     suspend fun getExpiringSoonProducts(days: Int = 3): List<Product> {
-        val threshold = System.currentTimeMillis() + (days * 24 * 60 * 60 * 1000L)
-        val currentTime = System.currentTimeMillis()
-
         val allProducts = productDao.getAllProducts().first()
         return allProducts.filter { product ->
-            !product.isDeleted && product.expirationDate.toLongOrNull() in (currentTime + 1)..threshold
+            !product.isDeleted && product.getDaysUntilExpiration() in 0..days
         }
     }
 
@@ -155,8 +155,47 @@ class ProductRepository @Inject constructor(
         syncManager.syncAllData()
     }
 
-    // Дополнительный метод для очистки базы (если нужно)
     suspend fun deleteAllProducts() {
         productDao.deleteAllProducts()
+    }
+
+    // НОВЫЕ МЕТОДЫ ДЛЯ РАБОТЫ С ПОЛЬЗОВАТЕЛЯМИ
+    suspend fun getMyProducts(userId: String): List<Product> {
+        return productDao.getMyProductsByUser(userId)
+    }
+
+    suspend fun getRecentlyAddedProducts(userId: String, limit: Int = 10): List<Product> {
+        return productDao.getRecentlyAddedByUser(userId, limit)
+    }
+
+    suspend fun getExpiringSoonByUser(userId: String, limit: Int = 5): List<Product> {
+        return productDao.getExpiringSoonByUser(userId, limit)
+    }
+
+    suspend fun getProductsByCategoryAndUser(category: String, userId: String): List<Product> {
+        return productDao.getProductsByCategoryAndUser(category, userId)
+    }
+
+    // МЕТОДЫ ДЛЯ БУДУЩЕЙ ИНТЕГРАЦИИ С ИИ
+    suspend fun searchProductsWithAI(query: String, userId: String): List<Product> {
+        // Пока используем обычный поиск, потом заменим на ИИ
+        return productDao.searchProductsByUser(query, userId)
+    }
+
+    suspend fun getAIRecipeSuggestions(userId: String): List<String> {
+        val userProducts = getMyProducts(userId)
+
+        // Временная логика рекомендаций на основе категорий продуктов пользователя
+        val categories = userProducts.map { it.category }.distinct()
+
+        return when {
+            categories.contains("Овощи") && categories.contains("Мясо, птица") ->
+                listOf("Овощное рагу с мясом", "Суп с овощами и курицей")
+            categories.contains("Молочные продукты") && categories.contains("Яйца") ->
+                listOf("Омлет с сыром", "Молочный коктейль")
+            categories.contains("Фрукты") ->
+                listOf("Фруктовый салат", "Смузи")
+            else -> listOf("Быстрый ужин из доступных продуктов")
+        }
     }
 }

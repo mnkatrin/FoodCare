@@ -1,5 +1,6 @@
 package com.example.foodcare.ui.products
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,23 +9,21 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.foodcare.FoodCareApplication
 import com.example.foodcare.R
 import com.example.foodcare.data.repository.ProductRepository
 import com.example.foodcare.databinding.FragmentProductsBinding
-import com.example.foodcare.ui.profile.ProfileManager
+import com.example.foodcare.ui.profile.ProfileClass // ДОБАВЬ ЭТОТ ИМПОРТ
 import kotlinx.coroutines.launch
 
-class ProductsFragment : Fragment(), ProfileManager.ProfileListener {
+class ProductsFragment : Fragment() { // УБРАТЬ implements ProfileManager.ProfileListener
 
     private var _binding: FragmentProductsBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var profileManager: ProfileManager
-    private var isProfileShowing = false
-
     // Получаем repository из FoodCareApplication
     private val repository: ProductRepository by lazy {
-        (requireContext().applicationContext as com.example.foodcare.FoodCareApplication).productRepository
+        (requireContext().applicationContext as FoodCareApplication).productRepository
     }
 
     private val viewModel: ProductsViewModel by viewModels {
@@ -45,16 +44,11 @@ class ProductsFragment : Fragment(), ProfileManager.ProfileListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Инициализируем менеджер профиля
-        profileManager = ProfileManager(requireContext(), binding.root)
-        profileManager.setProfileListener(this)
-        profileManager.initializeProfile()
-
         setupRecyclerView()
         observeProducts()
         setupProfileButton()
         setupBackButton()
-        setupBackgroundDim()
+        // УБРАТЬ setupBackgroundDim() - больше не нужен
     }
 
     private fun setupBackButton() {
@@ -65,73 +59,10 @@ class ProductsFragment : Fragment(), ProfileManager.ProfileListener {
 
     private fun setupProfileButton() {
         binding.profileButton.setOnClickListener {
-            showProfile()
+            // Переход на ProfileClass Activity
+            val intent = Intent(requireContext(), ProfileClass::class.java)
+            startActivity(intent)
         }
-    }
-
-    private fun setupBackgroundDim() {
-        // Обработчик клика на затемнение для закрытия профиля
-        binding.backgroundDim.setOnClickListener {
-            hideProfile()
-        }
-
-        // Обработчик клика на основную область (main) для закрытия профиля по клику на правую часть
-        binding.main.setOnClickListener {
-            if (isProfileShowing) {
-                hideProfile()
-            }
-        }
-    }
-
-    private fun showProfile() {
-        profileManager.showProfile()
-        binding.backgroundDim.visibility = View.VISIBLE
-        binding.backgroundDim.isClickable = true
-        isProfileShowing = true
-
-        // Блокируем прокрутку RecyclerView когда профиль открыт
-        binding.productsRecyclerView.isNestedScrollingEnabled = false
-
-        // Делаем основную область кликабельной для закрытия профиля
-        binding.main.isClickable = true
-    }
-
-    private fun hideProfile() {
-        profileManager.hideProfile()
-        binding.backgroundDim.visibility = View.GONE
-        binding.backgroundDim.isClickable = false
-        isProfileShowing = false
-
-        // Разблокируем прокрутку RecyclerView
-        binding.productsRecyclerView.isNestedScrollingEnabled = true
-
-        // Возвращаем нормальное состояние основной области
-        binding.main.isClickable = false
-    }
-
-    // Реализация методов ProfileListener
-    override fun onUserNameUpdated(newName: String) {
-        showToast("Имя обновлено: $newName")
-    }
-
-    override fun onLogoutRequested() {
-        performLogout()
-    }
-
-    override fun onProfileHidden() {
-        // Вызывается когда профиль скрыт из самого ProfileManager
-        binding.backgroundDim.visibility = View.GONE
-        binding.backgroundDim.isClickable = false
-        isProfileShowing = false
-        binding.productsRecyclerView.isNestedScrollingEnabled = true
-        binding.main.isClickable = false
-    }
-
-    private fun performLogout() {
-        lifecycleScope.launch {
-            repository.deleteAllProducts()
-        }
-        showToast("Выход из аккаунта выполнен")
     }
 
     private fun showToast(message: String) {
@@ -153,7 +84,6 @@ class ProductsFragment : Fragment(), ProfileManager.ProfileListener {
 
     private fun observeProducts() {
         lifecycleScope.launch {
-            // ИСПРАВЛЕНО: используем products вместо allProducts
             viewModel.products.collect { products ->
                 adapter.submitList(products)
 
@@ -171,7 +101,6 @@ class ProductsFragment : Fragment(), ProfileManager.ProfileListener {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        profileManager.cleanup()
         _binding = null
     }
 }

@@ -2,8 +2,10 @@ package com.example.foodcare.ui.auth
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.foodcare.FoodCareApplication
 import com.example.foodcare.databinding.ActivityRegisterBinding
 import com.example.foodcare.ui.main.MainActivity
 import com.google.firebase.auth.FirebaseAuth
@@ -18,6 +20,10 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRegisterBinding
     private lateinit var auth: FirebaseAuth
     private val db = Firebase.firestore
+
+    companion object {
+        private const val TAG = "RegisterActivity"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,13 +45,19 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     private fun performRegistration() {
-        val emailOrPhone = binding.etEmail2.text.toString().trim()
+        val email = binding.etEmail2.text.toString().trim()
         val password = binding.etPassword2.text.toString().trim()
         val name = binding.etName.text.toString().trim()
 
         // Валидация полей
-        if (emailOrPhone.isEmpty()) {
-            showError("Введите email или номер телефона")
+        if (email.isEmpty()) {
+            showError("Введите email")
+            binding.etEmail2.requestFocus()
+            return
+        }
+
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            showError("Введите корректный email")
             binding.etEmail2.requestFocus()
             return
         }
@@ -81,57 +93,11 @@ class RegisterActivity : AppCompatActivity() {
             return
         }
 
-        // Определяем тип ввода (email или телефон)
-        val inputType = determineInputType(emailOrPhone)
-        if (inputType == InputType.UNKNOWN) {
-            showError("Введите корректный email или номер телефона")
-            binding.etEmail2.requestFocus()
-            return
-        }
-
         // Блокируем кнопку на время регистрации
         binding.button.isEnabled = false
         binding.button.text = "Регистрация..."
 
-        // Регистрация в зависимости от типа ввода
-        when (inputType) {
-            InputType.EMAIL -> registerWithEmail(emailOrPhone, password, name)
-            InputType.PHONE -> registerWithPhone(emailOrPhone, password, name)
-            else -> {
-                binding.button.isEnabled = true
-                binding.button.text = "Зарегистрироваться"
-            }
-        }
-    }
-
-    private fun determineInputType(input: String): InputType {
-        return when {
-            android.util.Patterns.EMAIL_ADDRESS.matcher(input).matches() -> InputType.EMAIL
-            isValidPhoneNumber(input) -> InputType.PHONE
-            else -> InputType.UNKNOWN
-        }
-    }
-
-    private fun isValidPhoneNumber(phone: String): Boolean {
-        val cleanPhone = phone.replace("[^0-9]".toRegex(), "")
-        return when {
-            cleanPhone.length !in 10..12 -> false
-            cleanPhone.startsWith("7") || cleanPhone.startsWith("8") ||
-                    cleanPhone.startsWith("9") && cleanPhone.length == 11 -> true
-            cleanPhone.length == 10 -> true
-            else -> false
-        }
-    }
-
-    private fun formatPhoneNumber(phone: String): String {
-        val cleanPhone = phone.replace("[^0-9]".toRegex(), "")
-        return when {
-            cleanPhone.length == 10 -> "+7$cleanPhone"
-            cleanPhone.startsWith("7") && cleanPhone.length == 11 -> "+$cleanPhone"
-            cleanPhone.startsWith("8") && cleanPhone.length == 11 -> "+7${cleanPhone.substring(1)}"
-            cleanPhone.startsWith("9") && cleanPhone.length == 11 -> "+7$cleanPhone"
-            else -> "+$cleanPhone"
-        }
+        registerWithEmail(email, password, name)
     }
 
     private fun registerWithEmail(email: String, password: String, name: String) {
@@ -140,31 +106,12 @@ class RegisterActivity : AppCompatActivity() {
                 if (task.isSuccessful) {
                     val user = auth.currentUser
                     user?.let {
-                        updateUserProfile(it, name, email, "")
+                        updateUserProfile(it, name, email)
                     }
                 } else {
                     binding.button.isEnabled = true
                     binding.button.text = "Зарегистрироваться"
-                    handleRegistrationError(task.exception, InputType.EMAIL)
-                }
-            }
-    }
-
-    private fun registerWithPhone(phone: String, password: String, name: String) {
-        val formattedPhone = formatPhoneNumber(phone)
-        val tempEmail = "${formattedPhone.replace("[^0-9]".toRegex(), "")}@foodcare.com"
-
-        auth.createUserWithEmailAndPassword(tempEmail, password)
-            .addOnCompleteListener(this) { task ->
-                if (task.isSuccessful) {
-                    val user = auth.currentUser
-                    user?.let {
-                        updateUserProfile(it, name, tempEmail, formattedPhone)
-                    }
-                } else {
-                    binding.button.isEnabled = true
-                    binding.button.text = "Зарегистрироваться"
-                    handleRegistrationError(task.exception, InputType.PHONE)
+                    handleRegistrationError(task.exception)
                 }
             }
     }
@@ -172,37 +119,30 @@ class RegisterActivity : AppCompatActivity() {
     private fun updateUserProfile(
         user: com.google.firebase.auth.FirebaseUser,
         name: String,
-        email: String,
-        phone: String
+        email: String
     ) {
         val profileUpdates = UserProfileChangeRequest.Builder()
-            .setDisplayName(name) // Поддерживает любые символы включая русские
+            .setDisplayName(name)
             .build()
 
         user.updateProfile(profileUpdates)
             .addOnCompleteListener { profileTask ->
-                createUserInFirestore(user, name, email, phone)
+                createUserInFirestore(user, name, email)
             }
             .addOnFailureListener {
-                createUserInFirestore(user, name, email, phone)
+                createUserInFirestore(user, name, email)
             }
     }
 
     private fun createUserInFirestore(
         user: com.google.firebase.auth.FirebaseUser,
         name: String,
-        email: String,
-        phone: String
+        email: String
     ) {
-        val originalInput = binding.etEmail2.text.toString().trim()
-
         val userData = hashMapOf(
             "email" to email,
-            "name" to name, // Сохраняем имя как есть (русские символы)
+            "name" to name,
             "displayName" to name,
-            "phone" to phone,
-            "originalLogin" to originalInput,
-            "loginType" to if (phone.isNotEmpty()) "phone" else "email",
             "role" to "user",
             "createdAt" to FieldValue.serverTimestamp(),
             "lastLogin" to FieldValue.serverTimestamp(),
@@ -216,25 +156,40 @@ class RegisterActivity : AppCompatActivity() {
         db.collection("users").document(user.uid)
             .set(userData)
             .addOnSuccessListener {
-                showSuccess("Регистрация успешна!")
-                navigateToMain()
+                Log.d(TAG, "=== РЕГИСТРАЦИЯ УСПЕШНА ===")
+
+                // Сохраняем состояние входа через Application класс
+                FoodCareApplication.saveLoginState(true, email)
+
+                // НЕМЕДЛЕННАЯ ПРОВЕРКА сохранения
+                val (testIsLoggedIn, testEmail) = FoodCareApplication.getLoginState()
+                Log.d(TAG, "ПРОВЕРКА СОХРАНЕНИЯ: isLoggedIn=$testIsLoggedIn, email=$testEmail")
+
+                if (testIsLoggedIn && testEmail == email) {
+                    Log.d(TAG, "СОХРАНЕНИЕ УСПЕШНО")
+                    showSuccess("Регистрация успешна!")
+                    navigateToMain()
+                } else {
+                    Log.e(TAG, "ОШИБКА СОХРАНЕНИЯ")
+                    showError("Ошибка сохранения сессии.")
+                }
             }
             .addOnFailureListener { e ->
+                Log.e(TAG, "Ошибка Firestore: ${e.message}")
+
+                // ВСЕ РАВНО СОХРАНЯЕМ СОСТОЯНИЕ ВХОДА ДАЖЕ ЕСЛИ FIRESTORE НЕ СРАБОТАЛ
+                FoodCareApplication.saveLoginState(true, email)
                 showSuccess("Регистрация успешна!")
                 navigateToMain()
             }
     }
 
-    private fun handleRegistrationError(exception: Exception?, inputType: InputType) {
+    private fun handleRegistrationError(exception: Exception?) {
         val errorMessage = when {
             exception?.message?.contains("network", true) == true ->
                 "Проверьте подключение к интернету"
             exception?.message?.contains("email-already-in-use", true) == true ->
-                if (inputType == InputType.EMAIL) {
-                    "Пользователь с таким email уже зарегистрирован"
-                } else {
-                    "Пользователь с таким номером телефона уже зарегистрирован"
-                }
+                "Пользователь с таким email уже зарегистрирован"
             exception?.message?.contains("invalid-email", true) == true ->
                 "Неверный формат email"
             exception?.message?.contains("weak-password", true) == true ->
@@ -255,12 +210,10 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     private fun navigateToMain() {
-        val intent = Intent(this, MainActivity::class.java)
+        val intent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
         startActivity(intent)
         finishAffinity()
-    }
-
-    enum class InputType {
-        EMAIL, PHONE, UNKNOWN
     }
 }

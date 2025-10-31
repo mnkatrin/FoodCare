@@ -1,7 +1,9 @@
+// sync/FirebaseSyncManager.kt
 package com.example.foodcare.data.sync
 
 import com.example.foodcare.data.dao.ProductDao
 import com.example.foodcare.data.model.Product
+import com.example.foodcare.auth.UserManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
@@ -12,7 +14,8 @@ import javax.inject.Singleton
 
 @Singleton
 class FirebaseSyncManager @Inject constructor(
-    private val productDao: ProductDao
+    private val productDao: ProductDao,
+    private val userManager: UserManager // Добавляем UserManager
 ) {
 
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
@@ -22,23 +25,19 @@ class FirebaseSyncManager @Inject constructor(
         private const val COLLECTION_PRODUCTS = "user_products"
     }
 
-    private fun getCurrentUserId(): String? {
-        return auth.currentUser?.uid
+    private fun getCurrentUserId(): String {
+        // Используем Firebase UID если пользователь авторизован, иначе локальный ID
+        return auth.currentUser?.uid ?: userManager.getCurrentUserId()
     }
 
     private fun getUserProductsCollection(): String {
         val userId = getCurrentUserId()
-        return if (userId != null) "$COLLECTION_PRODUCTS/$userId/products" else COLLECTION_PRODUCTS
+        return "$COLLECTION_PRODUCTS/$userId/products"
     }
 
     suspend fun syncAllData() {
         try {
             val userId = getCurrentUserId()
-            if (userId == null) {
-                Timber.w("User not authenticated, skipping sync")
-                return
-            }
-
             Timber.d("Starting sync for user: $userId")
 
             // 1. Отправляем локальные изменения на Firebase
@@ -50,7 +49,7 @@ class FirebaseSyncManager @Inject constructor(
             // 3. Очищаем удаленные продукты
             cleanupDeletedProducts()
 
-            Timber.d("Sync completed successfully")
+            Timber.d("Sync completed successfully for user: $userId")
         } catch (e: Exception) {
             Timber.e(e, "Sync failed")
         }
@@ -205,9 +204,16 @@ class FirebaseSyncManager @Inject constructor(
             Timber.e(e, "Failed to delete product from Firebase")
         }
     }
+
+    // НОВЫЙ МЕТОД: Синхронизация только продуктов текущего пользователя
+    suspend fun syncUserProducts() {
+        val userId = getCurrentUserId()
+        Timber.d("Syncing products for user: $userId")
+        syncAllData()
+    }
 }
 
-// Extension functions для конвертации
+// ОБНОВЛЕННЫЕ Extension functions с поддержкой userId
 private fun Product.toFirebaseMap(): Map<String, Any> {
     return mapOf(
         "name" to name,
@@ -220,7 +226,9 @@ private fun Product.toFirebaseMap(): Map<String, Any> {
         "createdAt" to createdAt,
         "lastSynced" to System.currentTimeMillis(),
         "isDeleted" to isDeleted,
-        "isDirty" to isDirty
+        "isDirty" to isDirty,
+        "isMyProduct" to isMyProduct, // Добавляем новое поле
+        "userId" to userId // Добавляем userId для разделения данных
     )
 }
 
@@ -238,6 +246,8 @@ private fun com.google.firebase.firestore.DocumentSnapshot.toProduct(firebaseId:
         isDirty = getBoolean("isDirty") ?: false,
         firebaseId = firebaseId,
         lastSynced = getLong("lastSynced"),
-        isDeleted = getBoolean("isDeleted") ?: false
+        isDeleted = getBoolean("isDeleted") ?: false,
+        isMyProduct = getBoolean("isMyProduct") ?: true, // По умолчанию true
+        userId = getString("userId") ?: "" // Получаем userId из Firebase
     )
 }

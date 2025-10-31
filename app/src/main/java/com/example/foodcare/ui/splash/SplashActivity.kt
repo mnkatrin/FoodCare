@@ -1,87 +1,88 @@
 package com.example.foodcare.ui.splash
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.widget.Toast
+import android.util.Log
+import com.example.foodcare.FoodCareApplication
 import com.example.foodcare.databinding.ActivitySplashBinding
 import com.example.foodcare.ui.auth.LoginActivity
 import com.example.foodcare.ui.base.FullScreenActivity
 import com.example.foodcare.ui.main.MainActivity
-import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
 class SplashActivity : FullScreenActivity() {
 
     private lateinit var binding: ActivitySplashBinding
-    private val auth = Firebase.auth
+    private lateinit var sharedPreferences: SharedPreferences
+    private val TAG = "SplashActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySplashBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Автоматическая проверка пользователя через 2 секунды
+        sharedPreferences = getSharedPreferences("app_prefs", MODE_PRIVATE)
+
+        Log.d(TAG, "Splash activity started")
+
         Handler(Looper.getMainLooper()).postDelayed({
-            checkUserAndNavigate()
-        }, 2000)
+            checkAuthAndNavigate()
+        }, 1500)
     }
 
-    private fun checkUserAndNavigate() {
-        val currentUser = auth.currentUser
+    private fun checkAuthAndNavigate() {
+        Log.d(TAG, "Checking authentication status")
 
-        if (currentUser != null) {
-            // Пользователь есть локально - проверяем его валидность на сервере
-            verifyUserOnServer(currentUser.uid)
+        // Получаем UserManager
+        val userManager = (application as FoodCareApplication).userManager
+
+        // Проверяем состояние через Application класс
+        val (isLoggedIn, savedEmail) = FoodCareApplication.getLoginState()
+        Log.d(TAG, "App login state: isLoggedIn=$isLoggedIn, email=$savedEmail")
+
+        // Проверяем UserManager состояние
+        val userManagerEmail = userManager.getCurrentUserEmail()
+        val isFirebaseUser = userManager.isFirebaseUser()
+        Log.d(TAG, "UserManager state: email=$userManagerEmail, isFirebaseUser=$isFirebaseUser")
+
+        // Check Firebase auth
+        val auth = Firebase.auth
+        val currentUser = auth.currentUser
+        Log.d(TAG, "Firebase user: $currentUser")
+
+        // КРИТЕРИЙ ПЕРЕХОДА НА ГЛАВНЫЙ ЭКРАН:
+        // 1. Есть сохраненное состояние в FoodCareApplication ИЛИ
+        // 2. UserManager говорит что это Firebase пользователь ИЛИ
+        // 3. Firebase Auth имеет текущего пользователя
+        val shouldNavigateToMain = isLoggedIn && savedEmail.isNotEmpty() ||
+                isFirebaseUser ||
+                currentUser != null
+
+        if (shouldNavigateToMain) {
+            Log.d(TAG, "Navigating to MainActivity")
+
+            // Синхронизируем состояния если нужно
+            if (isLoggedIn && savedEmail.isNotEmpty() && userManagerEmail != savedEmail) {
+                userManager.setUserEmail(savedEmail)
+            }
+
+            navigateToMain()
         } else {
-            // Пользователя нет локально - на экран логина
+            Log.d(TAG, "Navigating to LoginActivity")
             navigateToLogin()
         }
     }
 
-    private fun verifyUserOnServer(userId: String) {
-        // Принудительно обновляем токен - если пользователь удален, это вызовет ошибку
-        auth.currentUser?.getIdToken(true)?.addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                // Токен обновлен - пользователь существует на сервере
-                navigateToMain()
-            } else {
-                // Не удалось обновить токен - пользователь удален или невалиден
-                when {
-                    task.exception is FirebaseAuthInvalidUserException -> {
-                        // Пользователь удален, отключен или не существует
-                        handleUserInvalid()
-                    }
-                    else -> {
-                        // Другие ошибки (сеть и т.д.) - все равно выходим для безопасности
-                        handleUserInvalid()
-                    }
-                }
-            }
-        }?.addOnFailureListener {
-            // При любой ошибке считаем пользователя невалидным
-            handleUserInvalid()
-        }
-    }
-
-    private fun handleUserInvalid() {
-        // Выходим и очищаем данные
-        auth.signOut()
-        clearLocalData()
-
-        Toast.makeText(this, "Сессия истекла. Войдите снова", Toast.LENGTH_LONG).show()
+    private fun attemptAutoLogin(savedEmail: String) {
+        Log.d(TAG, "Attempting auto login for: $savedEmail")
+        // Here you can add auto login logic if needed
+        // For now just navigate to login
         navigateToLogin()
-    }
-
-    private fun clearLocalData() {
-        // Очищаем SharedPreferences и другие локальные данные
-        val sharedPreferences = getSharedPreferences("user_data", MODE_PRIVATE)
-        sharedPreferences.edit().clear().apply()
-
-        // Здесь можно добавить очистку локальной БД если используется Room/SQLite
-        // database.clearAllTables()
     }
 
     private fun navigateToMain() {

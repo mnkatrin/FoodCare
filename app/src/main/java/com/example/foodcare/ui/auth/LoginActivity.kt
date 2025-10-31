@@ -2,8 +2,10 @@ package com.example.foodcare.ui.auth
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.foodcare.FoodCareApplication
 import com.example.foodcare.databinding.ActivityLoginBinding
 import com.example.foodcare.ui.main.MainActivity
 import com.google.firebase.auth.FirebaseAuth
@@ -11,7 +13,6 @@ import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import android.util.Log
 
 class LoginActivity : AppCompatActivity() {
 
@@ -29,7 +30,54 @@ class LoginActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         auth = Firebase.auth
+        // Включить сохранение состояния Firebase
+        auth.setLanguageCode("ru")
+
+        debugCurrentState("onCreate")
         setupClickListeners()
+        checkAutoLogin()
+    }
+
+    private fun debugCurrentState(location: String) {
+        val (isLoggedIn, savedEmail) = FoodCareApplication.getLoginState()
+        val firebaseUser = auth.currentUser
+
+        Log.d(TAG, "=== DEBUG $location ===")
+        Log.d(TAG, "App State - is_logged_in: $isLoggedIn")
+        Log.d(TAG, "App State - user_email: $savedEmail")
+        Log.d(TAG, "Firebase Auth - currentUser: $firebaseUser")
+        Log.d(TAG, "Firebase Auth - user UID: ${firebaseUser?.uid}")
+        Log.d(TAG, "Firebase Auth - user email: ${firebaseUser?.email}")
+
+        // Покажем ВСЕ SharedPreferences для отладки
+        FoodCareApplication.debugAllPreferences()
+    }
+
+    private fun checkAutoLogin() {
+        val (isLoggedIn, savedEmail) = FoodCareApplication.getLoginState()
+        val firebaseUser = auth.currentUser
+
+        // Если Firebase помнит пользователя И у нас сохранено состояние
+        if (firebaseUser != null && isLoggedIn && savedEmail.isNotEmpty()) {
+            Log.d(TAG, "Автоматический вход для: $savedEmail")
+            navigateToMain()
+        } else if (firebaseUser != null) {
+            // Firebase помнит пользователя, но у нас нет состояния - синхронизируем
+            Log.d(TAG, "Firebase user существует, синхронизируем состояние")
+            FoodCareApplication.saveLoginState(true, firebaseUser.email ?: "")
+            navigateToMain()
+        }
+        // Иначе остаемся на экране логина
+    }
+
+    private fun attemptAutoLogin(savedEmail: String) {
+        // Здесь нужно сохранить пароль для автоматического входа
+        // Или использовать другой метод аутентификации
+
+        // Временное решение - показать поля ввода с заполненным email
+        binding.etEmail.setText(savedEmail)
+        binding.etPassword.requestFocus()
+        Toast.makeText(this, "Введите пароль для $savedEmail", Toast.LENGTH_LONG).show()
     }
 
     private fun setupClickListeners() {
@@ -41,7 +89,7 @@ class LoginActivity : AppCompatActivity() {
             navigateToRegister()
         }
 
-        binding.button5.setOnClickListener {
+        binding.resetPasswordButton.setOnClickListener {
             navigateToForgotPassword()
         }
     }
@@ -50,7 +98,6 @@ class LoginActivity : AppCompatActivity() {
         val email = binding.etEmail.text.toString().trim()
         val password = binding.etPassword.text.toString().trim()
 
-        // Валидация полей
         if (email.isEmpty()) {
             showError("Введите email или номер телефона")
             binding.etEmail.requestFocus()
@@ -63,11 +110,9 @@ class LoginActivity : AppCompatActivity() {
             return
         }
 
-        // Блокируем кнопку на время авторизации
         binding.button2.isEnabled = false
         binding.button2.text = "Вход..."
 
-        // Определяем тип ввода (email или телефон)
         val inputType = determineInputType(email)
         if (inputType == InputType.UNKNOWN) {
             showError("Введите корректный email или номер телефона")
@@ -77,7 +122,6 @@ class LoginActivity : AppCompatActivity() {
             return
         }
 
-        // Пытаемся войти
         attemptLogin(email, password, inputType)
     }
 
@@ -102,7 +146,6 @@ class LoginActivity : AppCompatActivity() {
 
     private fun attemptLogin(emailOrPhone: String, password: String, inputType: InputType) {
         val loginEmail = if (inputType == InputType.PHONE) {
-            // Для телефона создаем временный email
             val formattedPhone = formatPhoneNumber(emailOrPhone)
             "${formattedPhone.replace("[^0-9]".toRegex(), "")}@foodcare.com"
         } else {
@@ -115,10 +158,8 @@ class LoginActivity : AppCompatActivity() {
                 binding.button2.text = "Войти"
 
                 if (task.isSuccessful) {
-                    // Успешный вход
-                    handleSuccessfulLogin()
+                    handleSuccessfulLogin(emailOrPhone)
                 } else {
-                    // Ошибка входа
                     handleLoginError(task.exception, emailOrPhone, password, inputType)
                 }
             }
@@ -134,15 +175,36 @@ class LoginActivity : AppCompatActivity() {
             else -> "+$cleanPhone"
         }
     }
-    private fun handleSuccessfulLogin() {
-        showSuccess("Успешный вход!")
-        navigateToMain()
+
+    private fun handleSuccessfulLogin(emailOrPhone: String) {
+        Log.d(TAG, "=== УСПЕШНЫЙ ВХОД ===")
+
+        // Получаем UserManager из Application
+        val userManager = (application as FoodCareApplication).userManager
+
+        // Сохраняем состояние в ОБА места
+        FoodCareApplication.saveLoginState(true, emailOrPhone)
+
+        // Также сохраняем в UserManager
+        userManager.setUserEmail(emailOrPhone)
+
+        // НЕМЕДЛЕННАЯ ПРОВЕРКА сохранения
+        val (testIsLoggedIn, testEmail) = FoodCareApplication.getLoginState()
+        Log.d(TAG, "ПРОВЕРКА СОХРАНЕНИЯ: isLoggedIn=$testIsLoggedIn, email=$testEmail")
+
+        if (testIsLoggedIn && testEmail == emailOrPhone) {
+            Log.d(TAG, "СОХРАНЕНИЕ УСПЕШНО")
+            showSuccess("Успешный вход!")
+            navigateToMain()
+        } else {
+            Log.e(TAG, "ОШИБКА СОХРАНЕНИЯ Данные не сохранились")
+            showError("Ошибка сохранения сессии. Попробуйте снова.")
+        }
     }
 
     private fun handleLoginError(exception: Exception?, emailOrPhone: String, password: String, inputType: InputType) {
         when {
             exception is FirebaseAuthInvalidUserException -> {
-                // Пользователь не существует, удален или отключен
                 when (inputType) {
                     InputType.EMAIL -> showError("Пользователь с таким email не существует")
                     InputType.PHONE -> showError("Пользователь с таким номером телефона не существует")
@@ -151,7 +213,6 @@ class LoginActivity : AppCompatActivity() {
                 binding.etEmail.requestFocus()
             }
             exception?.message?.contains("user-not-found", true) == true -> {
-                // Пользователь не найден
                 when (inputType) {
                     InputType.EMAIL -> showError("Пользователь с таким email не зарегистрирован")
                     InputType.PHONE -> showError("Пользователь с таким номером телефона не зарегистрирован")
@@ -160,26 +221,21 @@ class LoginActivity : AppCompatActivity() {
                 binding.etEmail.requestFocus()
             }
             exception?.message?.contains("wrong-password", true) == true -> {
-                // Неверный пароль
                 showError("Неверный пароль")
                 binding.etPassword.requestFocus()
                 binding.etPassword.text?.clear()
             }
             exception?.message?.contains("invalid-email", true) == true -> {
-                // Неверный формат email
                 showError("Неверный формат email")
                 binding.etEmail.requestFocus()
             }
             exception?.message?.contains("network", true) == true -> {
-                // Нет интернета
                 checkOfflineAccess()
             }
             exception?.message?.contains("too-many-requests", true) == true -> {
-                // Слишком много попыток
                 showError("Слишком много попыток входа. Попробуйте позже")
             }
             else -> {
-                // Другие ошибки
                 showError("Пользователь с таким номером телефона или email не зарегистрирован")
             }
         }
@@ -188,7 +244,6 @@ class LoginActivity : AppCompatActivity() {
     private fun checkOfflineAccess() {
         val currentUser = auth.currentUser
         if (currentUser != null) {
-            // Проверяем валидность пользователя для оффлайн режима
             verifyUserForOffline(currentUser)
         } else {
             showError("Нет подключения к интернету. Вход невозможен")
@@ -201,7 +256,6 @@ class LoginActivity : AppCompatActivity() {
                 showSuccess("Оффлайн режим. Добро пожаловать!")
                 navigateToMain()
             } else {
-                // Пользователь невалиден даже для оффлайн режима
                 auth.signOut()
                 showError("Сессия истекла. Требуется подключение к интернету")
             }
@@ -217,11 +271,14 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun navigateToMain() {
-        Log.d(TAG, "Navigating to MainActivity")
+        Log.d(TAG, "Переход в MainActivity")
+
+        // Финальная проверка состояния перед переходом
+        debugCurrentState("navigateToMain")
 
         val intent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            putExtra("SHOW_WELCOME", true) // Добавляем флаг для приветствия
+            putExtra("SHOW_WELCOME", true)
         }
         startActivity(intent)
         finish()

@@ -1,84 +1,67 @@
 package com.example.foodcare.ui.add_products
 
+import android.content.Intent
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.View
-import android.view.WindowManager
+import android.widget.ArrayAdapter
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import com.example.foodcare.FoodCareApplication
 import com.example.foodcare.R
+import com.example.foodcare.data.model.Product
 import com.example.foodcare.databinding.AddProductsBinding
-import com.example.foodcare.ui.profile.ProfileManager
-import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.example.foodcare.ui.profile.ProfileClass // ИЗМЕНИ ЭТОТ ИМПОРТ
+import java.text.SimpleDateFormat
+import java.util.*
 
-class AddProductActivity : AppCompatActivity(), ProfileManager.ProfileListener {
+class AddProductActivity : AppCompatActivity() { // УБРАТЬ implements ProfileFragment.ProfileListener
 
     private lateinit var binding: AddProductsBinding
-    private lateinit var profileManager: ProfileManager
-    private var isProfileShowing = false
     private var currentQuantity = 1
 
     private val viewModel: AddProductFormViewModel by viewModels {
         AddProductFormViewModelFactory(
-            (application as com.example.foodcare.FoodCareApplication).productRepository
+            (application as FoodCareApplication).productRepository
         )
     }
 
     // Список категорий
     private val categories = listOf(
-        "Напитки",
-        "Хлебобулочные изделия",
-        "Мясо, птица",
-        "Молочные продукты",
-        "Фрукты",
-        "Овощи",
-        "Консервы",
-        "Бакалея",
-        "Замороженные продукты",
-        "Сладости",
-        "Соусы и приправы",
-        "Рыба и морепродукты"
+        "Напитки", "Хлебобулочные изделия", "Мясо, птица", "Молочные продукты",
+        "Фрукты", "Овощи", "Консервы", "Бакалея", "Замороженные продукты",
+        "Сладости", "Соусы и приправы", "Рыба и морепродукты"
     )
 
-    // Список единиц измерения
-    private val units = listOf("гр", "мл", "кг", "л", "шт", "банка", "упаковка")
+    private val units = listOf("кг", "шт", "л")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // ПОЛНОЭКРАННЫЙ РЕЖИМ
-        makeFullScreen()
-
         binding = AddProductsBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        // Инициализируем менеджер профиля
-        profileManager = ProfileManager(this, binding.root)
-        profileManager.setProfileListener(this)
-        profileManager.initializeProfile()
+        makeFullScreen()
 
         setupClickListeners()
-        setupBackgroundDim()
         setupCategorySelection()
         setupQuantitySelector()
         setupUnitSelection()
+        setupDatePicker()
     }
 
-    private fun makeFullScreen() {
-        // Убираем статус бар и навигационную панель
-        window.decorView.systemUiVisibility = (
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        or View.SYSTEM_UI_FLAG_FULLSCREEN
-                        or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                )
+    private fun setupUnitSelection() {
+        val unitAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, units)
+        binding.unitEditText.setAdapter(unitAdapter)
+        binding.unitEditText.threshold = 1
 
-        // Для новых версий Android
-        window.setFlags(
-            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-        )
+        binding.unitEditText.setOnClickListener {
+            binding.unitEditText.showDropDown()
+        }
+
+        binding.unitEditText.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                binding.unitEditText.showDropDown()
+            }
+        }
     }
 
     private fun setupCategorySelection() {
@@ -86,76 +69,43 @@ class AddProductActivity : AppCompatActivity(), ProfileManager.ProfileListener {
             showCategorySelectionDialog()
         }
         binding.categoryEditText.isFocusable = false
-        binding.categoryEditText.isClickable = true
     }
 
-    private fun setupUnitSelection() {
-        binding.unitEditText.setOnClickListener {
-            showUnitSelectionDialog()
+    private fun setupDatePicker() {
+        binding.expiryDateEditText.setOnClickListener {
+            showDatePicker()
         }
-        binding.unitEditText.isFocusable = false
-        binding.unitEditText.isClickable = true
+        binding.expiryDateEditText.isFocusable = false
+    }
+
+    private fun showDatePicker() {
+        val calendar = Calendar.getInstance()
+        val datePicker = android.app.DatePickerDialog(
+            this,
+            { _, year, month, day ->
+                val selectedDate = Calendar.getInstance()
+                selectedDate.set(year, month, day)
+                val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
+                binding.expiryDateEditText.setText(dateFormat.format(selectedDate.time))
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
+        datePicker.datePicker.minDate = System.currentTimeMillis()
+        datePicker.show()
     }
 
     private fun showCategorySelectionDialog() {
-        val dialog = BottomSheetDialog(this)
-        val dialogView = layoutInflater.inflate(R.layout.dialog_category_selection, null)
-        dialog.setContentView(dialogView)
-
-        val categoryListView = dialogView.findViewById<android.widget.ListView>(R.id.categoryListView)
-        val searchEditText = dialogView.findViewById<android.widget.EditText>(R.id.searchEditText)
-        val closeButton = dialogView.findViewById<android.widget.Button>(R.id.closeButton)
-
-        val adapter = android.widget.ArrayAdapter(this, android.R.layout.simple_list_item_1, categories)
-        categoryListView.adapter = adapter
-
-        categoryListView.setOnItemClickListener { parent, view, position, id ->
-            val selectedCategory = adapter.getItem(position)
-            binding.categoryEditText.setText(selectedCategory)
-            dialog.dismiss()
-        }
-
-        searchEditText.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable?) {
-                val query = s.toString().trim()
-                if (query.isEmpty()) {
-                    categoryListView.adapter = adapter
-                } else {
-                    val filteredCategories = categories.filter {
-                        it.contains(query, ignoreCase = true)
-                    }
-                    val filteredAdapter = android.widget.ArrayAdapter(
-                        this@AddProductActivity,
-                        android.R.layout.simple_list_item_1,
-                        filteredCategories
-                    )
-                    categoryListView.adapter = filteredAdapter
-                }
+        val dialog = android.app.AlertDialog.Builder(this)
+            .setTitle("Выберите категорию")
+            .setItems(categories.toTypedArray()) { _, which ->
+                val selectedCategory = categories[which]
+                binding.categoryEditText.setText(selectedCategory)
             }
-        })
-
-        closeButton.setOnClickListener {
-            dialog.dismiss()
-        }
-
+            .setNegativeButton("Отмена") { dialog, _ -> dialog.dismiss() }
+            .create()
         dialog.show()
-    }
-
-    private fun showUnitSelectionDialog() {
-        // Временное решение с AlertDialog
-        val builder = android.app.AlertDialog.Builder(this)
-        builder.setTitle("Выберите единицу измерения")
-        builder.setItems(units.toTypedArray()) { dialog, which ->
-            val selectedUnit = units[which]
-            binding.unitEditText.setText(selectedUnit)
-            dialog.dismiss()
-        }
-        builder.setNegativeButton("Закрыть") { dialog, _ ->
-            dialog.dismiss()
-        }
-        builder.show()
     }
 
     private fun setupQuantitySelector() {
@@ -172,19 +122,13 @@ class AddProductActivity : AppCompatActivity(), ProfileManager.ProfileListener {
                 updateQuantityDisplay()
             }
         }
-
         updateQuantityDisplay()
     }
 
     private fun updateQuantityDisplay() {
         binding.quantityTextView.text = currentQuantity.toString()
         binding.decreaseQuantityButton.isEnabled = currentQuantity > 1
-
-        if (currentQuantity == 1) {
-            binding.decreaseQuantityButton.alpha = 0.5f
-        } else {
-            binding.decreaseQuantityButton.alpha = 1.0f
-        }
+        binding.decreaseQuantityButton.alpha = if (currentQuantity == 1) 0.5f else 1.0f
     }
 
     private fun setupClickListeners() {
@@ -196,132 +140,133 @@ class AddProductActivity : AppCompatActivity(), ProfileManager.ProfileListener {
             finish()
         }
 
+        // Кнопка профиля - переход на ProfileClass
         binding.profileButton.setOnClickListener {
-            showProfile()
+            val intent = Intent(this, ProfileClass::class.java)
+            startActivity(intent)
         }
 
         binding.addBarcodeButton.setOnClickListener {
-            openBarcodeScanner()
+            showToast("Сканирование штрих-кода")
         }
 
         binding.addPhotoButtonMain.setOnClickListener {
-            openCamera()
+            showToast("Открытие камеры")
         }
 
-        binding.addPhotoButtonBottom.setOnClickListener {
-            openCamera()
+        binding.addPhotoButton.setOnClickListener {
+            showToast("Открытие камеры")
         }
 
-        binding.expiryDateEditText.setOnClickListener {
-            showDatePicker()
-        }
-
-        binding.buttonList.setOnClickListener {
-            finish()
-        }
-
-        binding.buttonFridge.setOnClickListener {
-            finish()
-        }
-
-        binding.buttonRecipes.setOnClickListener {
-            finish()
-        }
+        binding.Button4.setOnClickListener { finish() }
+        binding.Button3.setOnClickListener { finish() }
+        binding.Button5.setOnClickListener { finish() }
     }
 
-    private fun showDatePicker() {
-        android.widget.Toast.makeText(this, "Выбор даты", android.widget.Toast.LENGTH_SHORT).show()
+    // УДАЛИТЬ эти методы - они больше не нужны:
+    /*
+    private fun showProfileFragment() {
+        // УДАЛИТЬ
     }
 
-    private fun setupBackgroundDim() {
-        binding.backgroundDim.setOnClickListener {
-            hideProfile()
-        }
+    private fun hideProfileFragment() {
+        // УДАЛИТЬ
     }
+    */
 
     private fun saveProduct() {
         val productName = binding.productNameEditText.text.toString().trim()
         val category = binding.categoryEditText.text.toString().trim()
         val expiryDate = binding.expiryDateEditText.text.toString().trim()
-        val quantity = currentQuantity
+        val quantity = currentQuantity.toDouble()
         val unit = binding.unitEditText.text.toString().trim()
 
-        if (productName.isEmpty() || category.isEmpty() || expiryDate.isEmpty() || unit.isEmpty()) {
-            android.widget.Toast.makeText(this, "Заполните все поля", android.widget.Toast.LENGTH_SHORT).show()
+        if (productName.isEmpty()) {
+            showToast("Введите название продукта")
             return
         }
 
-        android.widget.Toast.makeText(this, "Продукт сохранен: $productName\nКоличество: $quantity $unit", android.widget.Toast.LENGTH_LONG).show()
+        if (category.isEmpty()) {
+            showToast("Выберите категорию")
+            return
+        }
+
+        if (expiryDate.isEmpty()) {
+            showToast("Выберите дату окончания срока годности")
+            return
+        }
+
+        if (unit.isEmpty() || !units.contains(unit)) {
+            showToast("Выберите единицу измерения из списка: кг, шт, л")
+            return
+        }
+
+        val userId = (application as FoodCareApplication).userManager.getCurrentUserId()
+
+        val product = Product(
+            name = productName,
+            category = category,
+            expirationDate = expiryDate,
+            quantity = quantity,
+            unit = unit,
+            isMyProduct = true,
+            userId = userId
+        )
+
+        viewModel.addProduct(product)
+        showToast("$productName добавлен в Мои продукты!")
         finish()
     }
 
-    private fun showProfile() {
-        profileManager.showProfile()
-        binding.backgroundDim.visibility = View.VISIBLE
-        binding.backgroundDim.isClickable = true
-        isProfileShowing = true
-        setOtherElementsEnabled(false)
-
-        // Блокируем прокрутку основного контента
-        binding.main.isEnabled = false
+    // УДАЛИТЬ эти методы - они больше не нужны:
+    /*
+    // Реализация методов ProfileListener
+    override fun onLogoutRequested() {
+        performLogout()
     }
 
-    private fun hideProfile() {
-        profileManager.hideProfile()
-        binding.backgroundDim.visibility = View.GONE
-        binding.backgroundDim.isClickable = false
-        isProfileShowing = false
-        setOtherElementsEnabled(true)
-
-        // Разблокируем основной контент
-        binding.main.isEnabled = true
-    }
-
-    private fun setOtherElementsEnabled(enabled: Boolean) {
-        val elements = arrayOf(
-            binding.backButton,
-            binding.saveButton,
-            binding.addBarcodeButton,
-            binding.addPhotoButtonMain,
-            binding.addPhotoButtonBottom,
-            binding.buttonList,
-            binding.buttonFridge,
-            binding.buttonRecipes,
-            binding.productNameEditText,
-            binding.categoryEditText,
-            binding.expiryDateEditText,
-            binding.unitEditText,
-            binding.decreaseQuantityButton,
-            binding.increaseQuantityButton
-        )
-
-        elements.forEach { it?.isEnabled = enabled }
-    }
-
-    private fun openBarcodeScanner() {
-        android.widget.Toast.makeText(this, "Сканирование штрих-кода", android.widget.Toast.LENGTH_SHORT).show()
-    }
-
-    private fun openCamera() {
-        android.widget.Toast.makeText(this, "Открытие камеры", android.widget.Toast.LENGTH_SHORT).show()
-    }
-
-    override fun onUserNameUpdated(newName: String) {}
-    override fun onLogoutRequested() { performLogout() }
     override fun onProfileHidden() {
-        binding.backgroundDim.visibility = View.GONE
-        binding.backgroundDim.isClickable = false
-        isProfileShowing = false
-        setOtherElementsEnabled(true)
-        binding.main.isEnabled = true
+        hideProfileFragment()
     }
 
     private fun performLogout() {
         finish()
     }
+    */
 
-    override fun onDestroy() {
-        super.onDestroy()
-        profileManager.cleanup()
+    private fun showToast(message: String) {
+        android.widget.Toast.makeText(this, message, android.widget.Toast.LENGTH_SHORT).show()
+    }
+
+    // Остальные методы для полноэкранного режима
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) makeFullScreen()
+    }
+
+    private fun makeFullScreen() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            window.setDecorFitsSystemWindows(false)
+            val controller = window.insetsController
+            if (controller != null) {
+                controller.hide(
+                    android.view.WindowInsets.Type.statusBars() or
+                            android.view.WindowInsets.Type.navigationBars()
+                )
+                controller.systemBarsBehavior =
+                    android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            }
+        } else {
+            @Suppress("DEPRECATION")
+            window.decorView.systemUiVisibility = (
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            or View.SYSTEM_UI_FLAG_FULLSCREEN
+                            or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                    )
+        }
+        supportActionBar?.hide()
     }
 }

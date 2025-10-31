@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface ProductDao {
 
-    // МЕТОДЫ ДЛЯ PRODUCTS
+    // СУЩЕСТВУЮЩИЕ МЕТОДЫ ДЛЯ PRODUCTS
     @Query("SELECT * FROM products")
     fun getAllProducts(): Flow<List<Product>>
 
@@ -39,7 +39,23 @@ interface ProductDao {
     @Query("SELECT * FROM products WHERE isDeleted = 1")
     suspend fun getDeletedProducts(): List<Product>
 
-    // МЕТОДЫ ДЛЯ CATEGORIES
+    // НОВЫЕ МЕТОДЫ ДЛЯ РАБОТЫ С ПОЛЬЗОВАТЕЛЯМИ
+    @Query("SELECT * FROM products WHERE userId = :userId AND isMyProduct = 1 AND isDeleted = 0 ORDER BY createdAt DESC")
+    suspend fun getMyProductsByUser(userId: String): List<Product>
+
+    @Query("SELECT * FROM products WHERE userId = :userId AND isMyProduct = 1 AND isDeleted = 0 ORDER BY createdAt DESC LIMIT :limit")
+    suspend fun getRecentlyAddedByUser(userId: String, limit: Int): List<Product>
+
+    @Query("SELECT * FROM products WHERE userId = :userId AND (name LIKE '%' || :query || '%' OR category LIKE '%' || :query || '%') AND isDeleted = 0")
+    suspend fun searchProductsByUser(query: String, userId: String): List<Product>
+
+    @Query("SELECT * FROM products WHERE userId = :userId AND category = :category AND isDeleted = 0 ORDER BY createdAt DESC")
+    suspend fun getProductsByCategoryAndUser(category: String, userId: String): List<Product>
+
+    @Query("SELECT * FROM products WHERE userId = :userId AND isDeleted = 0 AND expirationDate != '' ORDER BY expirationDate ASC LIMIT :limit")
+    suspend fun getExpiringSoonByUser(userId: String, limit: Int = 5): List<Product>
+
+    // МЕТОДЫ ДЛЯ CATEGORIES (оставляем без изменений)
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCategory(category: Category)
 

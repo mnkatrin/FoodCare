@@ -2,10 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Разрешения ТОЛЬКО здесь, перед application -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <!-- Дополнительные разрешения для камеры и фото (если нужно) -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -20,6 +18,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.FoodCare"
+        android:largeHeap="true"
         tools:targetApi="31">
 
         <!-- Splash Activity - стартовый экран -->
@@ -32,20 +31,25 @@
             </intent-filter>
         </activity>
 
+        <!-- ДОБАВЬ ЭТИ АКТИВНОСТИ: -->
         <!-- Login Activity -->
         <activity
             android:name=".ui.auth.LoginActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.FoodCare" />
 
         <!-- Register Activity -->
         <activity
             android:name=".ui.auth.RegisterActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.FoodCare" />
 
         <!-- Forgot Password Activity -->
         <activity
             android:name=".ui.auth.ForgotPasswordActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.FoodCare" />
+
 
         <!-- Main Activity -->
         <activity
