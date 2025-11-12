@@ -6,29 +6,31 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.viewModels // Убираем фабрику
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.foodcare.FoodCareApplication
 import com.example.foodcare.R
-import com.example.foodcare.data.repository.ProductRepository
+import com.example.foodcare.data.repository.ProductRepository // Импортируем, если нужно вручную инжектировать
 import com.example.foodcare.databinding.FragmentProductsBinding
-import com.example.foodcare.ui.profile.ProfileClass // ДОБАВЬ ЭТОТ ИМПОРТ
-import kotlinx.coroutines.launch
+import com.example.foodcare.ui.profile.ProfileClass
+import com.example.foodcare.ui.app_product.ProductsViewModel // Убедитесь, что путь к ViewModel правильный
+import dagger.hilt.android.AndroidEntryPoint // <-- Добавлен импорт
+import javax.inject.Inject // <-- Добавлен импорт
 
-class ProductsFragment : Fragment() { // УБРАТЬ implements ProfileManager.ProfileListener
+// <-- Добавлена аннотация
+@AndroidEntryPoint
+class ProductsFragment : Fragment() {
 
     private var _binding: FragmentProductsBinding? = null
     private val binding get() = _binding!!
 
-    // Получаем repository из FoodCareApplication
-    private val repository: ProductRepository by lazy {
-        (requireContext().applicationContext as FoodCareApplication).productRepository
-    }
+    // --- ИНЖЕКТИРУЕМ ProductRepository (опционально, если нужен в Fragment) ---
+    // @Inject lateinit var productRepository: ProductRepository
+    // --- КОНЕЦ ИНЖЕКТИРОВАНИЯ ---
 
-    private val viewModel: ProductsViewModel by viewModels {
-        ProductsViewModelFactory(repository)
-    }
+    // --- ИЗМЕНЕНО: Получение ViewModel через Hilt ---
+    private val viewModel: ProductsViewModel by viewModels() // <-- Убрана фабрика
+    // --- КОНЕЦ ИЗМЕНЕНИЯ ---
 
     private lateinit var adapter: ProductAdapter
 

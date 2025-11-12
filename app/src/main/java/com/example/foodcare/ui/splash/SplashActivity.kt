@@ -41,8 +41,11 @@ class SplashActivity : FullScreenActivity() {
         // Получаем UserManager
         val userManager = (application as FoodCareApplication).userManager
 
-        // Проверяем состояние через Application класс
-        val (isLoggedIn, savedEmail) = FoodCareApplication.getLoginState()
+        // --- ИСПРАВЛЕНО: Вызов через UserManager ---
+        val isLoggedIn = userManager.getLoginState() // <-- Возвращает Boolean
+        val savedEmail = userManager.getCurrentUserEmail() // <-- Получаем email от UserManager
+        // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
+
         Log.d(TAG, "App login state: isLoggedIn=$isLoggedIn, email=$savedEmail")
 
         // Проверяем UserManager состояние
@@ -56,10 +59,10 @@ class SplashActivity : FullScreenActivity() {
         Log.d(TAG, "Firebase user: $currentUser")
 
         // КРИТЕРИЙ ПЕРЕХОДА НА ГЛАВНЫЙ ЭКРАН:
-        // 1. Есть сохраненное состояние в FoodCareApplication ИЛИ
+        // 1. Есть сохраненное состояние в UserManager И (isLoggedIn == true) ИЛИ
         // 2. UserManager говорит что это Firebase пользователь ИЛИ
         // 3. Firebase Auth имеет текущего пользователя
-        val shouldNavigateToMain = isLoggedIn && savedEmail.isNotEmpty() ||
+        val shouldNavigateToMain = (isLoggedIn && savedEmail.isNotEmpty()) || // <-- Уточнение: isLoggedIn == true и email есть
                 isFirebaseUser ||
                 currentUser != null
 

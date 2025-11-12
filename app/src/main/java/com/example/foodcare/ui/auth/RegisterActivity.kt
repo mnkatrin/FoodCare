@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.foodcare.FoodCareApplication
+import com.example.foodcare.auth.UserManager // Убедитесь, что импортирован
 import com.example.foodcare.databinding.ActivityRegisterBinding
 import com.example.foodcare.ui.main.MainActivity
 import com.google.firebase.auth.FirebaseAuth
@@ -14,12 +14,20 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import dagger.hilt.android.AndroidEntryPoint // <-- Добавлен импорт
+import javax.inject.Inject // <-- Добавлен импорт
 
+// <-- Добавлена аннотация
+@AndroidEntryPoint
 class RegisterActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRegisterBinding
     private lateinit var auth: FirebaseAuth
     private val db = Firebase.firestore
+
+    // --- ИНЖЕКТИРУЕМ UserManager ---
+    @Inject lateinit var userManager: UserManager
+    // --- КОНЕЦ ИНЖЕКТИРОВАНИЯ ---
 
     companion object {
         private const val TAG = "RegisterActivity"
@@ -158,11 +166,18 @@ class RegisterActivity : AppCompatActivity() {
             .addOnSuccessListener {
                 Log.d(TAG, "=== РЕГИСТРАЦИЯ УСПЕШНА ===")
 
-                // Сохраняем состояние входа через Application класс
-                FoodCareApplication.saveLoginState(true, email)
+                // --- ИСПРАВЛЕНО: Сохраняем состояние входа через инжектированный UserManager ---
+                // FoodCareApplication.saveLoginState(true, email) // <-- УБРАНО
+                userManager.setUserEmail(email) // <-- Сохраняем email через UserManager
+                // userManager.setUserName(name) // <-- При необходимости, сохраните имя тоже
+                // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
 
-                // НЕМЕДЛЕННАЯ ПРОВЕРКА сохранения
-                val (testIsLoggedIn, testEmail) = FoodCareApplication.getLoginState()
+                // --- ИСПРАВЛЕНО: Проверяем состояние через инжектированный UserManager ---
+                // val (testIsLoggedIn, testEmail) = FoodCareApplication.getLoginState() // <-- УБРАНО
+                val testIsLoggedIn = userManager.getLoginState() // <-- Получаем isLoggedIn через UserManager
+                val testEmail = userManager.getCurrentUserEmail() // <-- Получаем email через UserManager
+                // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
+
                 Log.d(TAG, "ПРОВЕРКА СОХРАНЕНИЯ: isLoggedIn=$testIsLoggedIn, email=$testEmail")
 
                 if (testIsLoggedIn && testEmail == email) {
@@ -178,7 +193,8 @@ class RegisterActivity : AppCompatActivity() {
                 Log.e(TAG, "Ошибка Firestore: ${e.message}")
 
                 // ВСЕ РАВНО СОХРАНЯЕМ СОСТОЯНИЕ ВХОДА ДАЖЕ ЕСЛИ FIRESTORE НЕ СРАБОТАЛ
-                FoodCareApplication.saveLoginState(true, email)
+                // FoodCareApplication.saveLoginState(true, email) // <-- УБРАНО
+                userManager.setUserEmail(email) // <-- Сохраняем email через UserManager
                 showSuccess("Регистрация успешна!")
                 navigateToMain()
             }

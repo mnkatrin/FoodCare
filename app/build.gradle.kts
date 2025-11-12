@@ -1,8 +1,12 @@
+// app/build.gradle.kts
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
     id("kotlin-kapt")
+    // --- ИСПРАВЛЕНО: Убрана версия и apply false ---
+    id("com.google.dagger.hilt.android") // <-- Применяем плагин к МОДУЛЮ app
+    // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
 }
 
 android {
@@ -22,7 +26,7 @@ android {
         multiDexEnabled = true
         vectorDrawables.useSupportLibrary = true
 
-        // Для Room
+        // Для Room - ПРАВИЛЬНО используем +=
         javaCompileOptions {
             annotationProcessorOptions {
                 arguments += mapOf(
@@ -91,6 +95,12 @@ android {
     }
 }
 
+// --- ДОБАВЛЕНО: Настройка kapt для Hilt ---
+kapt {
+    correctErrorTypes = true
+}
+// --- КОНЕЦ ДОБАВЛЕНИЯ ---
+
 dependencies {
     implementation("com.jakewharton.timber:timber:5.0.1")
     implementation("androidx.core:core-ktx:1.12.0")
@@ -129,6 +139,12 @@ dependencies {
     // ДОБАВЬ ДЛЯ ОПТИМИЗАЦИИ ИЗОБРАЖЕНИЙ:
     implementation("com.github.bumptech.glide:glide:4.16.0")
     kapt("com.github.bumptech.glide:compiler:4.16.0")
+
+    // --- ЗАВИСИМОСТИ Hilt ---
+    implementation("com.google.dagger:hilt-android:2.48")
+    kapt("com.google.dagger:hilt-compiler:2.48")
+    implementation("androidx.hilt:hilt-navigation-fragment:1.1.0") // Если используешь Navigation Component
+    // --- КОНЕЦ ЗАВИСИМОСТЕЙ ---
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

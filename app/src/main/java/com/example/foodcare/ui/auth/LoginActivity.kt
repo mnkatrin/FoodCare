@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.foodcare.FoodCareApplication
+import com.example.foodcare.auth.UserManager // Убедитесь, что импортирован
 import com.example.foodcare.databinding.ActivityLoginBinding
 import com.example.foodcare.ui.main.MainActivity
 import com.google.firebase.auth.FirebaseAuth
@@ -13,12 +13,20 @@ import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import dagger.hilt.android.AndroidEntryPoint // <-- Добавлен импорт
+import javax.inject.Inject // <-- Добавлен импорт
 
+// <-- Добавлена аннотация
+@AndroidEntryPoint
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
     private lateinit var auth: FirebaseAuth
     private val db = Firebase.firestore
+
+    // --- ИЗМЕНЕНО: Инжектируем UserManager через Hilt ---
+    @Inject lateinit var userManager: UserManager
+    // --- КОНЕЦ ИЗМЕНЕНИЯ ---
 
     companion object {
         private const val TAG = "LoginActivity"
@@ -30,44 +38,38 @@ class LoginActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         auth = Firebase.auth
-        // Включить сохранение состояния Firebase
         auth.setLanguageCode("ru")
 
-        debugCurrentState("onCreate")
-        setupClickListeners()
+        // debugCurrentState("onCreate") // <-- Убедитесь, что этот вызов также работает
+        setupClickListeners() // <-- Строка 48 (примерно)
         checkAutoLogin()
     }
 
     private fun debugCurrentState(location: String) {
-        val (isLoggedIn, savedEmail) = FoodCareApplication.getLoginState()
-        val firebaseUser = auth.currentUser
+        val isLoggedIn = userManager.getLoginState()
+        val savedEmail = userManager.getCurrentUserEmail()
 
         Log.d(TAG, "=== DEBUG $location ===")
         Log.d(TAG, "App State - is_logged_in: $isLoggedIn")
         Log.d(TAG, "App State - user_email: $savedEmail")
-        Log.d(TAG, "Firebase Auth - currentUser: $firebaseUser")
-        Log.d(TAG, "Firebase Auth - user UID: ${firebaseUser?.uid}")
-        Log.d(TAG, "Firebase Auth - user email: ${firebaseUser?.email}")
-
-        // Покажем ВСЕ SharedPreferences для отладки
-        FoodCareApplication.debugAllPreferences()
+        Log.d(TAG, "Firebase Auth - currentUser: ${auth.currentUser}")
+        Log.d(TAG, "Firebase Auth - user UID: ${auth.currentUser?.uid}")
+        Log.d(TAG, "Firebase Auth - user email: ${auth.currentUser?.email}")
     }
 
     private fun checkAutoLogin() {
-        val (isLoggedIn, savedEmail) = FoodCareApplication.getLoginState()
+        val isLoggedIn = userManager.getLoginState()
+        val savedEmail = userManager.getCurrentUserEmail()
         val firebaseUser = auth.currentUser
 
-        // Если Firebase помнит пользователя И у нас сохранено состояние
-        if (firebaseUser != null && isLoggedIn && savedEmail.isNotEmpty()) {
+        if (firebaseUser != null && isLoggedIn) {
             Log.d(TAG, "Автоматический вход для: $savedEmail")
             navigateToMain()
         } else if (firebaseUser != null) {
-            // Firebase помнит пользователя, но у нас нет состояния - синхронизируем
             Log.d(TAG, "Firebase user существует, синхронизируем состояние")
-            FoodCareApplication.saveLoginState(true, firebaseUser.email ?: "")
+            userManager.setUserEmail(firebaseUser.email ?: "")
             navigateToMain()
         }
-        // Иначе остаемся на экране логина
     }
 
     private fun attemptAutoLogin(savedEmail: String) {
@@ -80,6 +82,7 @@ class LoginActivity : AppCompatActivity() {
         Toast.makeText(this, "Введите пароль для $savedEmail", Toast.LENGTH_LONG).show()
     }
 
+    // --- МЕТОД setupClickListeners СЕЙЧАС ТУТ ---
     private fun setupClickListeners() {
         binding.button2.setOnClickListener {
             performLogin()
@@ -93,6 +96,7 @@ class LoginActivity : AppCompatActivity() {
             navigateToForgotPassword()
         }
     }
+    // --- КОНЕЦ МЕТОДА setupClickListeners ---
 
     private fun performLogin() {
         val email = binding.etEmail.text.toString().trim()
@@ -179,17 +183,17 @@ class LoginActivity : AppCompatActivity() {
     private fun handleSuccessfulLogin(emailOrPhone: String) {
         Log.d(TAG, "=== УСПЕШНЫЙ ВХОД ===")
 
-        // Получаем UserManager из Application
-        val userManager = (application as FoodCareApplication).userManager
-
-        // Сохраняем состояние в ОБА места
-        FoodCareApplication.saveLoginState(true, emailOrPhone)
+        // Сохраняем состояние ТОЛЬКО через UserManager
+        // FoodCareApplication.saveLoginState(true, emailOrPhone) // <-- УБРАТЬ ЭТУ СТРОКУ
 
         // Также сохраняем в UserManager
-        userManager.setUserEmail(emailOrPhone)
+        userManager.setUserEmail(emailOrPhone) // <-- Сохраняем email через UserManager
+        // userManager.setUserName(...) // Если нужно
 
         // НЕМЕДЛЕННАЯ ПРОВЕРКА сохранения
-        val (testIsLoggedIn, testEmail) = FoodCareApplication.getLoginState()
+        val testIsLoggedIn = userManager.getLoginState() // <-- Возвращает Boolean
+        val testEmail = userManager.getCurrentUserEmail() // <-- Получаем email от UserManager
+
         Log.d(TAG, "ПРОВЕРКА СОХРАНЕНИЯ: isLoggedIn=$testIsLoggedIn, email=$testEmail")
 
         if (testIsLoggedIn && testEmail == emailOrPhone) {

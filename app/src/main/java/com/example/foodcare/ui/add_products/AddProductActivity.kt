@@ -6,24 +6,23 @@ import android.view.View
 import android.widget.ArrayAdapter
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.example.foodcare.FoodCareApplication
 import com.example.foodcare.R
 import com.example.foodcare.data.model.Product
 import com.example.foodcare.databinding.AddProductsBinding
-import com.example.foodcare.ui.profile.ProfileClass // ИЗМЕНИ ЭТОТ ИМПОРТ
+import com.example.foodcare.ui.profile.ProfileClass
+import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
 import java.util.*
 
-class AddProductActivity : AppCompatActivity() { // УБРАТЬ implements ProfileFragment.ProfileListener
+@AndroidEntryPoint
+class AddProductActivity : AppCompatActivity() {
 
     private lateinit var binding: AddProductsBinding
     private var currentQuantity = 1
 
-    private val viewModel: AddProductFormViewModel by viewModels {
-        AddProductFormViewModelFactory(
-            (application as FoodCareApplication).productRepository
-        )
-    }
+    // --- ИЗМЕНЕНО: Получение ViewModel через Hilt ---
+    private val viewModel: com.example.foodcare.ui.app_product.AddProductViewModel by viewModels()
+    // --- КОНЕЦ ИЗМЕНЕНИЯ ---
 
     // Список категорий
     private val categories = listOf(
@@ -201,8 +200,11 @@ class AddProductActivity : AppCompatActivity() { // УБРАТЬ implements Prof
             return
         }
 
-        val userId = (application as FoodCareApplication).userManager.getCurrentUserId()
+        // --- ИСПРАВЛЕНО: Удалена строка получения userId из FoodCareApplication ---
+        // val userId = (application as FoodCareApplication).userManager.getCurrentUserId()
+        // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
 
+        // Создаём Product без userId. ViewModel сама его добавит.
         val product = Product(
             name = productName,
             category = category,
@@ -210,10 +212,12 @@ class AddProductActivity : AppCompatActivity() { // УБРАТЬ implements Prof
             quantity = quantity,
             unit = unit,
             isMyProduct = true,
-            userId = userId
+            userId = "" // или оставляем пустым, если ViewModel сама заполнит
         )
 
-        viewModel.addProduct(product)
+        // --- ИЗМЕНЕНО: Вызов метода ViewModel ---
+        viewModel.addProduct(product) // <-- ViewModel сама получит userId через Hilt
+        // --- КОНЕЦ ИЗМЕНЕНИЯ ---
         showToast("$productName добавлен в Мои продукты!")
         finish()
     }

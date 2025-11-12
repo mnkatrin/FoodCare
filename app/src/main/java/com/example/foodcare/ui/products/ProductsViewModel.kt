@@ -1,15 +1,20 @@
-package com.example.foodcare.ui.products
+// ui/app_product/ProductsViewModel.kt (или другой пакет, где он находится)
+package com.example.foodcare.ui.app_product // Убедись, что пакет правильный
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.foodcare.data.model.Product
 import com.example.foodcare.data.repository.ProductRepository
+import dagger.hilt.android.lifecycle.HiltViewModel // <-- Добавлен импорт
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject // <-- Добавлен импорт
 
-class ProductsViewModel(
+// <-- Добавь аннотации
+@HiltViewModel
+class ProductsViewModel @Inject constructor( // <-- Добавь @Inject к конструктору
     private val repository: ProductRepository
 ) : ViewModel() {
 

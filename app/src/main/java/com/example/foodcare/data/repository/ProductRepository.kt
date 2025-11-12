@@ -6,9 +6,13 @@ import com.example.foodcare.data.model.Product
 import com.example.foodcare.data.sync.FirebaseSyncManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import javax.inject.Inject
+import javax.inject.Inject // Убедись, что импорт есть
+import javax.inject.Singleton // <-- Добавлен импорт
+// import javax.inject.Singleton // <-- УБРАТЬ, если уже есть
 
-class ProductRepository @Inject constructor(
+// <-- Добавлена аннотация
+@Singleton
+class ProductRepository @Inject constructor( // <-- Убедись, что @Inject есть
     private val productDao: ProductDao,
     private val syncManager: FirebaseSyncManager
 ) {
