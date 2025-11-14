@@ -6,30 +6,33 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels // Убираем фабрику
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.foodcare.R
-import com.example.foodcare.data.repository.ProductRepository // Импортируем, если нужно вручную инжектировать
+import com.example.foodcare.data.repository.ProductRepository
 import com.example.foodcare.databinding.FragmentProductsBinding
 import com.example.foodcare.ui.profile.ProfileClass
-import com.example.foodcare.ui.app_product.ProductsViewModel // Убедитесь, что путь к ViewModel правильный
-import dagger.hilt.android.AndroidEntryPoint // <-- Добавлен импорт
-import javax.inject.Inject // <-- Добавлен импорт
+import com.example.foodcare.ui.products.ProductsViewModel
+// --- ДОБАВЬ ЭТОТ ИМПОРТ ---
+import kotlinx.coroutines.launch // <-- Добавь импорт для launch
+// --- КОНЕЦ ДОБАВЛЕНИЯ ---
 
-// <-- Добавлена аннотация
-@AndroidEntryPoint
+// Убираем аннотации Hilt
 class ProductsFragment : Fragment() {
 
     private var _binding: FragmentProductsBinding? = null
     private val binding get() = _binding!!
 
-    // --- ИНЖЕКТИРУЕМ ProductRepository (опционально, если нужен в Fragment) ---
-    // @Inject lateinit var productRepository: ProductRepository
-    // --- КОНЕЦ ИНЖЕКТИРОВАНИЯ ---
-
-    // --- ИЗМЕНЕНО: Получение ViewModel через Hilt ---
-    private val viewModel: ProductsViewModel by viewModels() // <-- Убрана фабрика
+    // --- ИЗМЕНЕНО: Получение ViewModel вручную ---
+    private val viewModel: ProductsViewModel by lazy {
+        val application = requireActivity().application as com.example.foodcare.FoodCareApplication
+        ViewModelProvider(
+            this,
+            com.example.foodcare.ui.products.ProductsViewModel.provideFactory(application.productRepository)
+        )[ProductsViewModel::class.java]
+    }
     // --- КОНЕЦ ИЗМЕНЕНИЯ ---
 
     private lateinit var adapter: ProductAdapter
@@ -50,7 +53,6 @@ class ProductsFragment : Fragment() {
         observeProducts()
         setupProfileButton()
         setupBackButton()
-        // УБРАТЬ setupBackgroundDim() - больше не нужен
     }
 
     private fun setupBackButton() {
@@ -85,7 +87,7 @@ class ProductsFragment : Fragment() {
     }
 
     private fun observeProducts() {
-        lifecycleScope.launch {
+        lifecycleScope.launch { // <-- Теперь launch должен быть распознан
             viewModel.products.collect { products ->
                 adapter.submitList(products)
 

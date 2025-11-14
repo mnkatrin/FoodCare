@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.foodcare.FoodCareApplication // Убедитесь, что импортирован
 import com.example.foodcare.auth.UserManager // Убедитесь, что импортирован
 import com.example.foodcare.databinding.ActivityLoginBinding
 import com.example.foodcare.ui.main.MainActivity
@@ -13,19 +14,20 @@ import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import dagger.hilt.android.AndroidEntryPoint // <-- Добавлен импорт
-import javax.inject.Inject // <-- Добавлен импорт
+// --- УБРАНО: import dagger.hilt.android.AndroidEntryPoint
+// --- УБРАНО: import javax.inject.Inject
 
-// <-- Добавлена аннотация
-@AndroidEntryPoint
+// --- УБРАНО: @AndroidEntryPoint
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
     private lateinit var auth: FirebaseAuth
     private val db = Firebase.firestore
 
-    // --- ИЗМЕНЕНО: Инжектируем UserManager через Hilt ---
-    @Inject lateinit var userManager: UserManager
+    // --- ИЗМЕНЕНО: Получаем UserManager из Application ---
+    private val userManager: UserManager by lazy {
+        (application as FoodCareApplication).userManager
+    }
     // --- КОНЕЦ ИЗМЕНЕНИЯ ---
 
     companion object {
@@ -40,8 +42,7 @@ class LoginActivity : AppCompatActivity() {
         auth = Firebase.auth
         auth.setLanguageCode("ru")
 
-        // debugCurrentState("onCreate") // <-- Убедитесь, что этот вызов также работает
-        setupClickListeners() // <-- Строка 48 (примерно)
+        setupClickListeners()
         checkAutoLogin()
     }
 
@@ -73,16 +74,11 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun attemptAutoLogin(savedEmail: String) {
-        // Здесь нужно сохранить пароль для автоматического входа
-        // Или использовать другой метод аутентификации
-
-        // Временное решение - показать поля ввода с заполненным email
         binding.etEmail.setText(savedEmail)
         binding.etPassword.requestFocus()
         Toast.makeText(this, "Введите пароль для $savedEmail", Toast.LENGTH_LONG).show()
     }
 
-    // --- МЕТОД setupClickListeners СЕЙЧАС ТУТ ---
     private fun setupClickListeners() {
         binding.button2.setOnClickListener {
             performLogin()
@@ -96,7 +92,6 @@ class LoginActivity : AppCompatActivity() {
             navigateToForgotPassword()
         }
     }
-    // --- КОНЕЦ МЕТОДА setupClickListeners ---
 
     private fun performLogin() {
         val email = binding.etEmail.text.toString().trim()
@@ -183,16 +178,10 @@ class LoginActivity : AppCompatActivity() {
     private fun handleSuccessfulLogin(emailOrPhone: String) {
         Log.d(TAG, "=== УСПЕШНЫЙ ВХОД ===")
 
-        // Сохраняем состояние ТОЛЬКО через UserManager
-        // FoodCareApplication.saveLoginState(true, emailOrPhone) // <-- УБРАТЬ ЭТУ СТРОКУ
+        userManager.setUserEmail(emailOrPhone)
 
-        // Также сохраняем в UserManager
-        userManager.setUserEmail(emailOrPhone) // <-- Сохраняем email через UserManager
-        // userManager.setUserName(...) // Если нужно
-
-        // НЕМЕДЛЕННАЯ ПРОВЕРКА сохранения
-        val testIsLoggedIn = userManager.getLoginState() // <-- Возвращает Boolean
-        val testEmail = userManager.getCurrentUserEmail() // <-- Получаем email от UserManager
+        val testIsLoggedIn = userManager.getLoginState()
+        val testEmail = userManager.getCurrentUserEmail()
 
         Log.d(TAG, "ПРОВЕРКА СОХРАНЕНИЯ: isLoggedIn=$testIsLoggedIn, email=$testEmail")
 
@@ -277,7 +266,6 @@ class LoginActivity : AppCompatActivity() {
     private fun navigateToMain() {
         Log.d(TAG, "Переход в MainActivity")
 
-        // Финальная проверка состояния перед переходом
         debugCurrentState("navigateToMain")
 
         val intent = Intent(this, MainActivity::class.java).apply {

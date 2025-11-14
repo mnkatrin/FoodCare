@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.foodcare.FoodCareApplication // Убедитесь, что импортирован
 import com.example.foodcare.auth.UserManager // Убедитесь, что импортирован
 import com.example.foodcare.databinding.ActivityRegisterBinding
 import com.example.foodcare.ui.main.MainActivity
@@ -14,20 +15,21 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import dagger.hilt.android.AndroidEntryPoint // <-- Добавлен импорт
-import javax.inject.Inject // <-- Добавлен импорт
+// --- УБРАНО: import dagger.hilt.android.AndroidEntryPoint
+// --- УБРАНО: import javax.inject.Inject
 
-// <-- Добавлена аннотация
-@AndroidEntryPoint
+// --- УБРАНО: @AndroidEntryPoint
 class RegisterActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRegisterBinding
     private lateinit var auth: FirebaseAuth
     private val db = Firebase.firestore
 
-    // --- ИНЖЕКТИРУЕМ UserManager ---
-    @Inject lateinit var userManager: UserManager
-    // --- КОНЕЦ ИНЖЕКТИРОВАНИЯ ---
+    // --- ИЗМЕНЕНО: Получаем UserManager из Application ---
+    private val userManager: UserManager by lazy {
+        (application as FoodCareApplication).userManager
+    }
+    // --- КОНЕЦ ИЗМЕНЕНИЯ ---
 
     companion object {
         private const val TAG = "RegisterActivity"
@@ -57,7 +59,6 @@ class RegisterActivity : AppCompatActivity() {
         val password = binding.etPassword2.text.toString().trim()
         val name = binding.etName.text.toString().trim()
 
-        // Валидация полей
         if (email.isEmpty()) {
             showError("Введите email")
             binding.etEmail2.requestFocus()
@@ -82,7 +83,6 @@ class RegisterActivity : AppCompatActivity() {
             return
         }
 
-        // ТОЛЬКО проверка длины - без ограничений на символы
         if (name.length < 2) {
             showError("Имя должно содержать минимум 2 символа")
             binding.etName.requestFocus()
@@ -101,7 +101,6 @@ class RegisterActivity : AppCompatActivity() {
             return
         }
 
-        // Блокируем кнопку на время регистрации
         binding.button.isEnabled = false
         binding.button.text = "Регистрация..."
 
@@ -166,16 +165,13 @@ class RegisterActivity : AppCompatActivity() {
             .addOnSuccessListener {
                 Log.d(TAG, "=== РЕГИСТРАЦИЯ УСПЕШНА ===")
 
-                // --- ИСПРАВЛЕНО: Сохраняем состояние входа через инжектированный UserManager ---
-                // FoodCareApplication.saveLoginState(true, email) // <-- УБРАНО
-                userManager.setUserEmail(email) // <-- Сохраняем email через UserManager
-                // userManager.setUserName(name) // <-- При необходимости, сохраните имя тоже
+                // --- ИСПРАВЛЕНО: Сохраняем состояние через UserManager ---
+                userManager.setUserEmail(email)
                 // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
 
-                // --- ИСПРАВЛЕНО: Проверяем состояние через инжектированный UserManager ---
-                // val (testIsLoggedIn, testEmail) = FoodCareApplication.getLoginState() // <-- УБРАНО
-                val testIsLoggedIn = userManager.getLoginState() // <-- Получаем isLoggedIn через UserManager
-                val testEmail = userManager.getCurrentUserEmail() // <-- Получаем email через UserManager
+                // --- ИСПРАВЛЕНО: Проверяем состояние через UserManager ---
+                val testIsLoggedIn = userManager.getLoginState()
+                val testEmail = userManager.getCurrentUserEmail()
                 // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
 
                 Log.d(TAG, "ПРОВЕРКА СОХРАНЕНИЯ: isLoggedIn=$testIsLoggedIn, email=$testEmail")
@@ -193,8 +189,7 @@ class RegisterActivity : AppCompatActivity() {
                 Log.e(TAG, "Ошибка Firestore: ${e.message}")
 
                 // ВСЕ РАВНО СОХРАНЯЕМ СОСТОЯНИЕ ВХОДА ДАЖЕ ЕСЛИ FIRESTORE НЕ СРАБОТАЛ
-                // FoodCareApplication.saveLoginState(true, email) // <-- УБРАНО
-                userManager.setUserEmail(email) // <-- Сохраняем email через UserManager
+                userManager.setUserEmail(email)
                 showSuccess("Регистрация успешна!")
                 navigateToMain()
             }

@@ -1,4 +1,3 @@
-// sync/FirebaseSyncManager.kt
 package com.example.foodcare.data.sync
 
 import com.example.foodcare.data.dao.ProductDao
@@ -9,13 +8,15 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class FirebaseSyncManager @Inject constructor(
-    private val productDao: ProductDao,
-    private val userManager: UserManager // Добавляем UserManager
+// --- УБРАНО: @Singleton, @Inject constructor ---
+// import javax.inject.Inject
+// import javax.inject.Singleton
+
+// Убираем аннотации
+class FirebaseSyncManager( // Убираем @Inject
+    val productDao: ProductDao, // Убираем private, если нужно получить доступ извне
+    val userManager: UserManager // Убираем private, если нужно получить доступ извне
 ) {
 
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()

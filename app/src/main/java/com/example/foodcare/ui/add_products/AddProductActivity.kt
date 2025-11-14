@@ -4,24 +4,26 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.ArrayAdapter
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import com.example.foodcare.FoodCareApplication // Убедитесь, что импортирован
 import com.example.foodcare.R
 import com.example.foodcare.data.model.Product
 import com.example.foodcare.databinding.AddProductsBinding
 import com.example.foodcare.ui.profile.ProfileClass
-import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
 import java.util.*
 
-@AndroidEntryPoint
+// --- УБРАНО: @AndroidEntryPoint ---
+// import dagger.hilt.android.AndroidEntryPoint
+
+// Убираем аннотацию
 class AddProductActivity : AppCompatActivity() {
 
     private lateinit var binding: AddProductsBinding
     private var currentQuantity = 1
 
-    // --- ИЗМЕНЕНО: Получение ViewModel через Hilt ---
-    private val viewModel: com.example.foodcare.ui.app_product.AddProductViewModel by viewModels()
+    // --- ИЗМЕНЕНО: Получение ViewModel вручную ---
+    private lateinit var viewModel: com.example.foodcare.ui.app_product.AddProductViewModel
     // --- КОНЕЦ ИЗМЕНЕНИЯ ---
 
     // Список категорий
@@ -39,6 +41,13 @@ class AddProductActivity : AppCompatActivity() {
         binding = AddProductsBinding.inflate(layoutInflater)
         setContentView(binding.root)
         makeFullScreen()
+
+        // --- ИЗМЕНЕНО: Создаём ViewModel вручную ---
+        val application = application as FoodCareApplication
+        viewModel = com.example.foodcare.ui.app_product.AddProductViewModel(
+            productRepository = application.productRepository // Предполагается, что productRepository доступен в Application
+        )
+        // --- КОНЕЦ ИЗМЕНЕНИЯ ---
 
         setupClickListeners()
         setupCategorySelection()
@@ -200,10 +209,6 @@ class AddProductActivity : AppCompatActivity() {
             return
         }
 
-        // --- ИСПРАВЛЕНО: Удалена строка получения userId из FoodCareApplication ---
-        // val userId = (application as FoodCareApplication).userManager.getCurrentUserId()
-        // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
-
         // Создаём Product без userId. ViewModel сама его добавит.
         val product = Product(
             name = productName,
@@ -216,7 +221,7 @@ class AddProductActivity : AppCompatActivity() {
         )
 
         // --- ИЗМЕНЕНО: Вызов метода ViewModel ---
-        viewModel.addProduct(product) // <-- ViewModel сама получит userId через Hilt
+        viewModel.addProduct(product) // <-- ViewModel сама получит userId через Repository
         // --- КОНЕЦ ИЗМЕНЕНИЯ ---
         showToast("$productName добавлен в Мои продукты!")
         finish()

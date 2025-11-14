@@ -1,19 +1,19 @@
-// auth/UserManager.kt
 package com.example.foodcare.auth
 
 import android.content.Context
 import android.content.SharedPreferences
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import dagger.hilt.android.qualifiers.ApplicationContext // <-- Добавь импорт
 import kotlinx.coroutines.tasks.await
-import javax.inject.Inject // <-- Добавь импорт
-import javax.inject.Singleton // <-- Добавь импорт
 
-// <-- Добавь аннотации
-@Singleton
-class UserManager @Inject constructor( // <-- Добавь @Inject к конструктору
-    @ApplicationContext private val context: Context // <-- Убедись, что используешь @ApplicationContext
+// --- УБРАНО: @Singleton, @Inject constructor, @ApplicationContext ---
+// import dagger.hilt.android.qualifiers.ApplicationContext
+// import javax.inject.Inject
+// import javax.inject.Singleton
+
+// Убираем аннотации
+class UserManager( // Убираем @Inject
+    private val context: Context // Убираем @ApplicationContext
 ) {
 
     private val prefs: SharedPreferences by lazy {

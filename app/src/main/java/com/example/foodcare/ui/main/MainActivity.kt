@@ -8,6 +8,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.drawerlayout.widget.DrawerLayout
+import com.example.foodcare.FoodCareApplication // Убедитесь, что импортирован
 import com.example.foodcare.auth.UserManager // Убедитесь, что импортирован
 import com.example.foodcare.R
 import com.example.foodcare.databinding.ActivityMainBinding
@@ -17,20 +18,23 @@ import com.example.foodcare.ui.app_product.AddProductFragment
 import com.example.foodcare.ui.products.ProductsFragment
 import com.example.foodcare.ui.profile.ProfileFragment
 import com.google.firebase.auth.FirebaseAuth
-import dagger.hilt.android.AndroidEntryPoint // <-- Добавлен импорт
-import javax.inject.Inject // <-- Добавлен импорт
 
-// <-- Добавлена аннотация
-@AndroidEntryPoint
-class MainActivity : FullScreenActivity() {
+// --- УБРАНО: @AndroidEntryPoint ---
+// import dagger.hilt.android.AndroidEntryPoint
+
+// Убираем аннотацию
+class MainActivity : FullScreenActivity() { // Убираем @AndroidEntryPoint
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var drawerLayout: DrawerLayout
 
-    // --- ИНЖЕКТИРУЕМ UserManager ---
-    @Inject lateinit var userManager: UserManager
-    // --- КОНЕЦ ИНЖЕКТИРОВАНИЯ ---
+    // --- ИЗМЕНЕНО: Получаем UserManager вручную ---
+    private val userManager: UserManager by lazy {
+        val application = application as FoodCareApplication
+        application.userManager
+    }
+    // --- КОНЕЦ ИЗМЕНЕНИЯ ---
 
     // Переменные для перетаскивания
     private var xDelta = 0f
@@ -42,8 +46,6 @@ class MainActivity : FullScreenActivity() {
         private const val PREF_FIRST_LAUNCH = "first_launch"
         private const val PROFILE_BUTTON_X = "profile_button_x"
         private const val PROFILE_BUTTON_Y = "profile_button_y"
-        // УБРАТЬ: private const val PREF_IS_LOGGED_IN = "is_logged_in"
-        // УБРАТЬ: private const val PREF_USER_EMAIL = "user_email"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -297,7 +299,6 @@ class MainActivity : FullScreenActivity() {
 
     private fun performLogout() {
         // --- ИСПРАВЛЕНО: Выполняем logout через инжектированный UserManager ---
-        // FoodCareApplication.clearLoginState() // <-- УБРАНО
         userManager.logout() // <-- Вызываем logout через UserManager
         // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
 
@@ -310,17 +311,6 @@ class MainActivity : FullScreenActivity() {
         startActivity(intent)
         finish()
     }
-
-    // --- УБРАНО: Старый метод clearLoginState ---
-    // private fun clearLoginState() {
-    //     sharedPreferences.edit().apply {
-    //         remove(PREF_IS_LOGGED_IN)
-    //         remove(PREF_USER_EMAIL)
-    //         commit() // ИСПОЛЬЗУЕМ commit() ВМЕСТО apply()
-    //     }
-    //     android.util.Log.d("MainActivity", "Состояние входа очищено")
-    // }
-    // --- КОНЕЦ УБРАНО ---
 
     private fun saveButtonPosition(x: Float, y: Float) {
         sharedPreferences.edit().apply {

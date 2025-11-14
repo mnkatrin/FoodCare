@@ -1,20 +1,23 @@
-// ui/app_product/ProductsViewModel.kt (или другой пакет, где он находится)
-package com.example.foodcare.ui.app_product // Убедись, что пакет правильный
+// ui/app_product/ProductsViewModel.kt
+package com.example.foodcare.ui.products // Убедись, что пакет правильный
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider // <-- Добавлен импорт
 import androidx.lifecycle.viewModelScope
 import com.example.foodcare.data.model.Product
 import com.example.foodcare.data.repository.ProductRepository
-import dagger.hilt.android.lifecycle.HiltViewModel // <-- Добавлен импорт
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject // <-- Добавлен импорт
 
-// <-- Добавь аннотации
-@HiltViewModel
-class ProductsViewModel @Inject constructor( // <-- Добавь @Inject к конструктору
+// Убираем аннотации Hilt
+// import dagger.hilt.android.lifecycle.HiltViewModel
+// import javax.inject.Inject
+
+// Убираем аннотации Hilt
+// @HiltViewModel
+class ProductsViewModel( // Убираем @Inject
     private val repository: ProductRepository
 ) : ViewModel() {
 
@@ -82,4 +85,20 @@ class ProductsViewModel @Inject constructor( // <-- Добавь @Inject к ко
             repository.addProduct(product)
         }
     }
+
+    // --- ДОБАВИТЬ: Внутренний Factory ---
+    companion object {
+        fun provideFactory(
+            productRepository: ProductRepository
+        ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                if (modelClass.isAssignableFrom(ProductsViewModel::class.java)) {
+                    return ProductsViewModel(productRepository) as T
+                }
+                throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
+            }
+        }
+    }
+    // --- КОНЕЦ ДОБАВЛЕНИЯ ---
 }

@@ -4,9 +4,10 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
     id("kotlin-kapt")
-    // --- ИСПРАВЛЕНО: Убрана версия и apply false ---
-    id("com.google.dagger.hilt.android") // <-- Применяем плагин к МОДУЛЮ app
-    // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
+    // id("kotlin-kapt") // <-- УБРАТЬ: Больше не нужен kapt для Hilt
+    // --- УБРАНО: Применяем плагин к МОДУЛЮ app ---
+    // id("com.google.dagger.hilt.android")
+    // --- КОНЕЦ УБРАНО ---
 }
 
 android {
@@ -22,11 +23,10 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // ДОБАВЬ ЭТИ СТРОКИ ДЛЯ ПАМЯТИ:
         multiDexEnabled = true
         vectorDrawables.useSupportLibrary = true
 
-        // Для Room - ПРАВИЛЬНО используем +=
+        // Для Room - ПРАВИЛЬНО используем += (остаётся, так как Room использует kapt)
         javaCompileOptions {
             annotationProcessorOptions {
                 arguments += mapOf(
@@ -48,13 +48,11 @@ android {
         }
         debug {
             isDebuggable = true
-            // ДОБАВЬ ДЛЯ DEBUG:
             isMinifyEnabled = false
             isShrinkResources = false
         }
     }
 
-    // ДОБАВЬ ЭТУ СЕКЦИЮ ДЛЯ ОПТИМИЗАЦИИ ПАМЯТИ:
     dexOptions {
         javaMaxHeapSize = "4g"
         preDexLibraries = false
@@ -95,11 +93,17 @@ android {
     }
 }
 
-// --- ДОБАВЛЕНО: Настройка kapt для Hilt ---
-kapt {
-    correctErrorTypes = true
-}
-// --- КОНЕЦ ДОБАВЛЕНИЯ ---
+// --- УБРАНО: Настройка kapt для Hilt ---
+// kapt {
+//     correctErrorTypes = true
+// }
+// --- КОНЕЦ УБРАНО ---
+
+// --- УБРАНО: Настройка Hilt Gradle Plugin ---
+// hilt {
+//     enableAggregatingTask = true
+// }
+// --- КОНЕЦ УБРАНО ---
 
 dependencies {
     implementation("com.jakewharton.timber:timber:5.0.1")
@@ -112,39 +116,28 @@ dependencies {
     implementation("androidx.navigation:navigation-fragment-ktx:2.7.7")
     implementation("androidx.navigation:navigation-ui-ktx:2.7.7")
 
-    // ДОБАВЬ MULTIDEX:
     implementation("androidx.multidex:multidex:2.0.1")
 
-    // Firebase BOM (Bill of Materials) - для совместимости версий
     implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.firebase:firebase-analytics-ktx")
 
-    // Room Database
     implementation("androidx.room:room-runtime:2.6.0")
     implementation("androidx.room:room-ktx:2.6.0")
-    kapt("androidx.room:room-compiler:2.6.0")
+    kapt("androidx.room:room-compiler:2.6.0") // <-- ОСТАВИТЬ: Room всё ещё использует kapt
 
-    // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
 
-    // Lifecycle
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
 
-    // ДОБАВЬ ДЛЯ ОПТИМИЗАЦИИ ИЗОБРАЖЕНИЙ:
     implementation("com.github.bumptech.glide:glide:4.16.0")
-    kapt("com.github.bumptech.glide:compiler:4.16.0")
+    kapt("com.github.bumptech.glide:compiler:4.16.0") // <-- ОСТАВИТЬ: Glide использует kapt
 
-    // --- ЗАВИСИМОСТИ Hilt ---
-    implementation("com.google.dagger:hilt-android:2.48")
-    kapt("com.google.dagger:hilt-compiler:2.48")
-    implementation("androidx.hilt:hilt-navigation-fragment:1.1.0") // Если используешь Navigation Component
-    // --- КОНЕЦ ЗАВИСИМОСТЕЙ ---
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

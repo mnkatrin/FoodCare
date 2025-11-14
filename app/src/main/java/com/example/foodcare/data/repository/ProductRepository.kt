@@ -6,15 +6,15 @@ import com.example.foodcare.data.model.Product
 import com.example.foodcare.data.sync.FirebaseSyncManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import javax.inject.Inject // Убедись, что импорт есть
-import javax.inject.Singleton // <-- Добавлен импорт
-// import javax.inject.Singleton // <-- УБРАТЬ, если уже есть
 
-// <-- Добавлена аннотация
-@Singleton
-class ProductRepository @Inject constructor( // <-- Убедись, что @Inject есть
-    private val productDao: ProductDao,
-    private val syncManager: FirebaseSyncManager
+// --- УБРАНО: @Singleton, @Inject constructor ---
+// import javax.inject.Inject
+// import javax.inject.Singleton
+
+// Убираем аннотации
+class ProductRepository( // Убираем @Inject
+    val productDao: ProductDao, // Убираем private, если нужно получить доступ извне
+    val syncManager: FirebaseSyncManager // Убираем private, если нужно получить доступ извне
 ) {
 
     // СУЩЕСТВУЮЩИЕ МЕТОДЫ
