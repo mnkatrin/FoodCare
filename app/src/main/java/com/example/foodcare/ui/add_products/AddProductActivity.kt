@@ -5,32 +5,31 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
-import com.example.foodcare.FoodCareApplication // Убедитесь, что импортирован
+import androidx.lifecycle.ViewModelProvider
+import com.example.foodcare.FoodCareApplication
 import com.example.foodcare.R
 import com.example.foodcare.data.model.Product
-import com.example.foodcare.databinding.AddProductsBinding
+import com.example.foodcare.databinding.AddProductsBinding // <-- ИСПРАВЛЕНО: Правильное имя Binding
 import com.example.foodcare.ui.profile.ProfileClass
+import com.example.foodcare.ui.app_product.AddProductFormViewModel // <-- Убедись, что путь к ViewModel правильный
 import java.text.SimpleDateFormat
 import java.util.*
 
-// --- УБРАНО: @AndroidEntryPoint ---
-// import dagger.hilt.android.AndroidEntryPoint
-
-// Убираем аннотацию
+// Убираем аннотацию @AndroidEntryPoint, т.к. Hilt не используется
 class AddProductActivity : AppCompatActivity() {
 
-    private lateinit var binding: AddProductsBinding
+    private lateinit var binding: AddProductsBinding // <-- ИСПРАВЛЕНО: Правильное имя Binding
     private var currentQuantity = 1
 
-    // --- ИЗМЕНЕНО: Получение ViewModel вручную ---
-    private lateinit var viewModel: com.example.foodcare.ui.app_product.AddProductViewModel
+    // --- ИЗМЕНЕНО: Получение ViewModel через ViewModelProvider ---
+    private lateinit var viewModel: AddProductFormViewModel // <-- ИСПРАВЛЕНО: Правильное имя ViewModel
     // --- КОНЕЦ ИЗМЕНЕНИЯ ---
 
     // Список категорий
     private val categories = listOf(
         "Напитки", "Хлебобулочные изделия", "Мясо, птица", "Молочные продукты",
         "Фрукты", "Овощи", "Консервы", "Бакалея", "Замороженные продукты",
-        "Сладости", "Соусы и приправы", "Рыба и морепродукты"
+        "Сладости", "Соусы и приправы", "Рыба и морепродукты", "Снеки"
     )
 
     private val units = listOf("кг", "шт", "л")
@@ -38,15 +37,16 @@ class AddProductActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding = AddProductsBinding.inflate(layoutInflater)
+        binding = AddProductsBinding.inflate(layoutInflater) // <-- ИСПРАВЛЕНО: Правильное имя Binding
         setContentView(binding.root)
         makeFullScreen()
 
-        // --- ИЗМЕНЕНО: Создаём ViewModel вручную ---
+        // --- ИЗМЕНЕНО: Создаём ViewModel вручную через ViewModelProvider ---
         val application = application as FoodCareApplication
-        viewModel = com.example.foodcare.ui.app_product.AddProductViewModel(
-            productRepository = application.productRepository // Предполагается, что productRepository доступен в Application
-        )
+        viewModel = ViewModelProvider( // <-- Используем ViewModelProvider
+            this,
+            AddProductFormViewModel.provideFactory(application.productRepository) // <-- Используем фабрику из ViewModel
+        )[AddProductFormViewModel::class.java] // <-- Используем правильное имя ViewModel
         // --- КОНЕЦ ИЗМЕНЕНИЯ ---
 
         setupClickListeners()
@@ -58,32 +58,32 @@ class AddProductActivity : AppCompatActivity() {
 
     private fun setupUnitSelection() {
         val unitAdapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, units)
-        binding.unitEditText.setAdapter(unitAdapter)
-        binding.unitEditText.threshold = 1
+        binding.unitEditText.setAdapter(unitAdapter) // <-- ИСПРАВЛЕНО: Правильный Binding
+        binding.unitEditText.threshold = 1 // <-- ИСПРАВЛЕНО: Правильный Binding
 
-        binding.unitEditText.setOnClickListener {
-            binding.unitEditText.showDropDown()
+        binding.unitEditText.setOnClickListener { // <-- ИСПРАВЛЕНО: Правильный Binding
+            binding.unitEditText.showDropDown() // <-- ИСПРАВЛЕНО: Правильный Binding
         }
 
-        binding.unitEditText.setOnFocusChangeListener { _, hasFocus ->
+        binding.unitEditText.setOnFocusChangeListener { _, hasFocus -> // <-- ИСПРАВЛЕНО: Правильный Binding
             if (hasFocus) {
-                binding.unitEditText.showDropDown()
+                binding.unitEditText.showDropDown() // <-- ИСПРАВЛЕНО: Правильный Binding
             }
         }
     }
 
     private fun setupCategorySelection() {
-        binding.categoryEditText.setOnClickListener {
+        binding.categoryEditText.setOnClickListener { // <-- ИСПРАВЛЕНО: Правильный Binding
             showCategorySelectionDialog()
         }
-        binding.categoryEditText.isFocusable = false
+        binding.categoryEditText.isFocusable = false // <-- ИСПРАВЛЕНО: Правильный Binding
     }
 
     private fun setupDatePicker() {
-        binding.expiryDateEditText.setOnClickListener {
+        binding.expiryDateEditText.setOnClickListener { // <-- ИСПРАВЛЕНО: Правильный Binding
             showDatePicker()
         }
-        binding.expiryDateEditText.isFocusable = false
+        binding.expiryDateEditText.isFocusable = false // <-- ИСПРАВЛЕНО: Правильный Binding
     }
 
     private fun showDatePicker() {
@@ -94,7 +94,7 @@ class AddProductActivity : AppCompatActivity() {
                 val selectedDate = Calendar.getInstance()
                 selectedDate.set(year, month, day)
                 val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
-                binding.expiryDateEditText.setText(dateFormat.format(selectedDate.time))
+                binding.expiryDateEditText.setText(dateFormat.format(selectedDate.time)) // <-- ИСПРАВЛЕНО: Правильный Binding
             },
             calendar.get(Calendar.YEAR),
             calendar.get(Calendar.MONTH),
@@ -109,7 +109,7 @@ class AddProductActivity : AppCompatActivity() {
             .setTitle("Выберите категорию")
             .setItems(categories.toTypedArray()) { _, which ->
                 val selectedCategory = categories[which]
-                binding.categoryEditText.setText(selectedCategory)
+                binding.categoryEditText.setText(selectedCategory) // <-- ИСПРАВЛЕНО: Правильный Binding
             }
             .setNegativeButton("Отмена") { dialog, _ -> dialog.dismiss() }
             .create()
@@ -117,14 +117,14 @@ class AddProductActivity : AppCompatActivity() {
     }
 
     private fun setupQuantitySelector() {
-        binding.decreaseQuantityButton.setOnClickListener {
+        binding.decreaseQuantityButton.setOnClickListener { // <-- ИСПРАВЛЕНО: Правильный Binding
             if (currentQuantity > 1) {
                 currentQuantity--
                 updateQuantityDisplay()
             }
         }
 
-        binding.increaseQuantityButton.setOnClickListener {
+        binding.increaseQuantityButton.setOnClickListener { // <-- ИСПРАВЛЕНО: Правильный Binding
             if (currentQuantity < 999) {
                 currentQuantity++
                 updateQuantityDisplay()
@@ -134,78 +134,71 @@ class AddProductActivity : AppCompatActivity() {
     }
 
     private fun updateQuantityDisplay() {
-        binding.quantityTextView.text = currentQuantity.toString()
-        binding.decreaseQuantityButton.isEnabled = currentQuantity > 1
-        binding.decreaseQuantityButton.alpha = if (currentQuantity == 1) 0.5f else 1.0f
+        binding.quantityTextView.text = currentQuantity.toString() // <-- ИСПРАВЛЕНО: Правильный Binding
+        binding.decreaseQuantityButton.isEnabled = currentQuantity > 1 // <-- ИСПРАВЛЕНО: Правильный Binding
+        binding.decreaseQuantityButton.alpha = if (currentQuantity == 1) 0.5f else 1.0f // <-- ИСПРАВЛЕНО: Правильный Binding
     }
 
     private fun setupClickListeners() {
-        binding.saveButton.setOnClickListener {
+        binding.saveButton.setOnClickListener { // <-- ИСПРАВЛЕНО: Правильный Binding
             saveProduct()
         }
 
-        binding.backButton.setOnClickListener {
+        binding.backButton.setOnClickListener { // <-- ИСПРАВЛЕНО: Правильный Binding
             finish()
         }
 
         // Кнопка профиля - переход на ProfileClass
-        binding.profileButton.setOnClickListener {
+        binding.profileButton.setOnClickListener { // <-- ИСПРАВЛЕНО: Правильный Binding
             val intent = Intent(this, ProfileClass::class.java)
             startActivity(intent)
         }
 
-        binding.addBarcodeButton.setOnClickListener {
+        binding.addBarcodeButton.setOnClickListener { // <-- ИСПРАВЛЕНО: Правильный Binding
             showToast("Сканирование штрих-кода")
         }
 
-        binding.addPhotoButtonMain.setOnClickListener {
+        binding.addPhotoButtonMain.setOnClickListener { // <-- ИСПРАВЛЕНО: Правильный Binding
             showToast("Открытие камеры")
         }
 
-        binding.addPhotoButton.setOnClickListener {
+        binding.addPhotoButton.setOnClickListener { // <-- ИСПРАВЛЕНО: Правильный Binding
             showToast("Открытие камеры")
         }
 
-        binding.Button4.setOnClickListener { finish() }
-        binding.Button3.setOnClickListener { finish() }
-        binding.Button5.setOnClickListener { finish() }
+        binding.Button4.setOnClickListener { finish() } // <-- ИСПРАВЛЕНО: Правильный Binding
+        binding.Button3.setOnClickListener { finish() } // <-- ИСПРАВЛЕНО: Правильный Binding
+        binding.Button5.setOnClickListener { finish() } // <-- ИСПРАВЛЕНО: Правильный Binding
     }
-
-    // УДАЛИТЬ эти методы - они больше не нужны:
-    /*
-    private fun showProfileFragment() {
-        // УДАЛИТЬ
-    }
-
-    private fun hideProfileFragment() {
-        // УДАЛИТЬ
-    }
-    */
 
     private fun saveProduct() {
-        val productName = binding.productNameEditText.text.toString().trim()
-        val category = binding.categoryEditText.text.toString().trim()
-        val expiryDate = binding.expiryDateEditText.text.toString().trim()
+        val productName = binding.productNameEditText.text.toString().trim() // <-- ИСПРАВЛЕНО: Правильный Binding
+        val category = binding.categoryEditText.text.toString().trim() // <-- ИСПРАВЛЕНО: Правильный Binding
+        val expiryDate = binding.expiryDateEditText.text.toString().trim() // <-- ИСПРАВЛЕНО: Правильный Binding
         val quantity = currentQuantity.toDouble()
-        val unit = binding.unitEditText.text.toString().trim()
+        val unit = binding.unitEditText.text.toString().trim() // <-- ИСПРАВЛЕНО: Правильный Binding
 
         if (productName.isEmpty()) {
             showToast("Введите название продукта")
+            binding.productNameEditText.requestFocus() // <-- ИСПРАВЛЕНО: Правильный Binding
             return
         }
 
         if (category.isEmpty()) {
             showToast("Выберите категорию")
+            binding.categoryEditText.requestFocus() // <-- ИСПРАВЛЕНО: Правильный Binding
             return
         }
 
         if (expiryDate.isEmpty()) {
             showToast("Выберите дату окончания срока годности")
+            binding.expiryDateEditText.requestFocus() // <-- ИСПРАВЛЕНО: Правильный Binding
             return
         }
 
         if (unit.isEmpty() || !units.contains(unit)) {
             showToast("Выберите единицу измерения из списка: кг, шт, л")
+            binding.unitEditText.requestFocus() // <-- ИСПРАВЛЕНО: Правильный Binding
             return
         }
 
@@ -220,34 +213,17 @@ class AddProductActivity : AppCompatActivity() {
             userId = "" // или оставляем пустым, если ViewModel сама заполнит
         )
 
-        // --- ИЗМЕНЕНО: Вызов метода ViewModel ---
-        viewModel.addProduct(product) // <-- ViewModel сама получит userId через Repository
-        // --- КОНЕЦ ИЗМЕНЕНИЯ ---
+
+        viewModel.addProduct(product)
+
         showToast("$productName добавлен в Мои продукты!")
         finish()
     }
-
-    // УДАЛИТЬ эти методы - они больше не нужны:
-    /*
-    // Реализация методов ProfileListener
-    override fun onLogoutRequested() {
-        performLogout()
-    }
-
-    override fun onProfileHidden() {
-        hideProfileFragment()
-    }
-
-    private fun performLogout() {
-        finish()
-    }
-    */
 
     private fun showToast(message: String) {
         android.widget.Toast.makeText(this, message, android.widget.Toast.LENGTH_SHORT).show()
     }
 
-    // Остальные методы для полноэкранного режима
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus) makeFullScreen()

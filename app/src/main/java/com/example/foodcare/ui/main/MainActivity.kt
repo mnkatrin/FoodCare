@@ -8,33 +8,27 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.drawerlayout.widget.DrawerLayout
-import com.example.foodcare.FoodCareApplication // Убедитесь, что импортирован
-import com.example.foodcare.auth.UserManager // Убедитесь, что импортирован
+import com.example.foodcare.FoodCareApplication
+import com.example.foodcare.auth.UserManager
 import com.example.foodcare.R
 import com.example.foodcare.databinding.ActivityMainBinding
 import com.example.foodcare.ui.auth.LoginActivity
 import com.example.foodcare.ui.base.FullScreenActivity
+import com.example.foodcare.ui.app_product.AddProductSearchFragment
 import com.example.foodcare.ui.app_product.AddProductFragment
 import com.example.foodcare.ui.products.ProductsFragment
 import com.example.foodcare.ui.profile.ProfileFragment
-import com.google.firebase.auth.FirebaseAuth
 
-// --- УБРАНО: @AndroidEntryPoint ---
-// import dagger.hilt.android.AndroidEntryPoint
-
-// Убираем аннотацию
-class MainActivity : FullScreenActivity() { // Убираем @AndroidEntryPoint
+class MainActivity : FullScreenActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var drawerLayout: DrawerLayout
 
-    // --- ИЗМЕНЕНО: Получаем UserManager вручную ---
     private val userManager: UserManager by lazy {
         val application = application as FoodCareApplication
         application.userManager
     }
-    // --- КОНЕЦ ИЗМЕНЕНИЯ ---
 
     // Переменные для перетаскивания
     private var xDelta = 0f
@@ -113,12 +107,12 @@ class MainActivity : FullScreenActivity() { // Убираем @AndroidEntryPoint
 
         // Центральная круглая кнопка
         binding.imageButton4.setOnClickListener {
-            // Действие для центральной кнопки
+            // Тут можешь повесить нужное действие
         }
 
-        // Кнопка Button4 - открываем добавление продуктов
+        // 🔹 Кнопка Button4 - открываем экран ПОИСКА (fragment_add_product)
         binding.Button4.setOnClickListener {
-            openAddProductFragment()
+            openAddProductSearchFragment()
         }
 
         // Кнопка профиля - открываем Drawer слева
@@ -128,19 +122,22 @@ class MainActivity : FullScreenActivity() { // Убираем @AndroidEntryPoint
 
         // Другие кнопки в нижней панели
         binding.Button3.setOnClickListener {
-            // Другое действие для кнопки 3
+            // Действие для кнопки 3
         }
 
         binding.Button5.setOnClickListener {
-            // Другое действие для кнопки 5
+            // Действие для кнопки 5
         }
     }
 
     private fun openProfile() {
-        // Открываем Drawer с профилем слева
         drawerLayout.openDrawer(binding.profileContainer)
     }
 
+    /**
+     * Экран формы добавления продукта (layout: add_products.xml)
+     * Использует фрагмент ui.add_products.AddProductFragment
+     */
     private fun openAddProductFragment() {
         hideMainContent()
         binding.fragmentContainer.visibility = View.VISIBLE
@@ -150,6 +147,22 @@ class MainActivity : FullScreenActivity() { // Убираем @AndroidEntryPoint
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, addProductFragment)
             .addToBackStack("addProduct")
+            .commit()
+    }
+
+    /**
+     * 🔹 Экран ПОИСКА продуктов (layout: fragment_add_product.xml)
+     * Использует фрагмент ui.app_product.AddProductSearchFragment
+     */
+    private fun openAddProductSearchFragment() {
+        hideMainContent()
+        binding.fragmentContainer.visibility = View.VISIBLE
+
+        val searchFragment = AddProductSearchFragment()
+
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, searchFragment)
+            .addToBackStack("addProductSearch")
             .commit()
     }
 
@@ -166,7 +179,6 @@ class MainActivity : FullScreenActivity() { // Убираем @AndroidEntryPoint
     }
 
     private fun hideMainContent() {
-        // Скрываем все основные элементы главного экрана
         binding.foodCareLayout.visibility = View.GONE
         binding.textView6.visibility = View.GONE
         binding.buttonsContainer.visibility = View.GONE
@@ -190,7 +202,6 @@ class MainActivity : FullScreenActivity() { // Убираем @AndroidEntryPoint
     }
 
     private fun showMainContent() {
-        // Показываем все основные элементы главного экрана
         binding.foodCareLayout.visibility = View.VISIBLE
         binding.textView6.visibility = View.VISIBLE
         binding.buttonsContainer.visibility = View.VISIBLE
@@ -215,7 +226,6 @@ class MainActivity : FullScreenActivity() { // Убираем @AndroidEntryPoint
 
     override fun onBackPressed() {
         if (drawerLayout.isDrawerOpen(binding.profileContainer)) {
-            // Если открыт профиль - закрываем его
             drawerLayout.closeDrawers()
         } else if (supportFragmentManager.backStackEntryCount > 0) {
             supportFragmentManager.popBackStack()
@@ -229,7 +239,6 @@ class MainActivity : FullScreenActivity() { // Убираем @AndroidEntryPoint
     private fun setupDraggableButton() {
         val draggableButton = binding.profileButton
 
-        // Загружаем сохраненное положение кнопки профиля
         val savedX = sharedPreferences.getFloat(PROFILE_BUTTON_X, -1f)
         val savedY = sharedPreferences.getFloat(PROFILE_BUTTON_Y, -1f)
 
@@ -253,8 +262,9 @@ class MainActivity : FullScreenActivity() { // Убираем @AndroidEntryPoint
                     val moveX = event.rawX + xDelta
                     val moveY = event.rawY + yDelta
 
-                    if (Math.abs(moveX - view.x) > clickThreshold ||
-                        Math.abs(moveY - view.y) > clickThreshold) {
+                    if (kotlin.math.abs(moveX - view.x) > clickThreshold ||
+                        kotlin.math.abs(moveY - view.y) > clickThreshold
+                    ) {
                         isDragging = true
                     }
 
@@ -273,7 +283,7 @@ class MainActivity : FullScreenActivity() { // Убираем @AndroidEntryPoint
                     view.alpha = 1.0f
 
                     if (!isDragging) {
-                        openProfile() // Открываем профиль при клике
+                        openProfile()
                     }
 
                     saveButtonPosition(view.x, view.y)
@@ -298,12 +308,7 @@ class MainActivity : FullScreenActivity() { // Убираем @AndroidEntryPoint
     }
 
     private fun performLogout() {
-        // --- ИСПРАВЛЕНО: Выполняем logout через инжектированный UserManager ---
-        userManager.logout() // <-- Вызываем logout через UserManager
-        // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
-
-        // Выход из Firebase (UserManager уже вызвал signOut, если нужно)
-        // FirebaseAuth.getInstance().signOut() // <-- УБРАНО, т.к. UserManager уже делает это
+        userManager.logout()
 
         val intent = Intent(this, LoginActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -316,7 +321,7 @@ class MainActivity : FullScreenActivity() { // Убираем @AndroidEntryPoint
         sharedPreferences.edit().apply {
             putFloat(PROFILE_BUTTON_X, x)
             putFloat(PROFILE_BUTTON_Y, y)
-            commit() // ИСПОЛЬЗУЕМ commit() ВМЕСТО apply()
+            commit()
         }
     }
 
@@ -330,7 +335,6 @@ class MainActivity : FullScreenActivity() { // Убираем @AndroidEntryPoint
             saveButtonPosition(draggableButton.x, draggableButton.y)
         }
     }
-
 
     override fun onPause() {
         super.onPause()

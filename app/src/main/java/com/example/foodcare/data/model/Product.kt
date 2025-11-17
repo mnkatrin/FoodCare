@@ -1,11 +1,13 @@
-// model/Product.kt
 package com.example.foodcare.data.model
 
+import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.parcelize.Parcelize
 import java.text.SimpleDateFormat
 import java.util.*
 
+@Parcelize
 @Entity(tableName = "products")
 data class Product(
     @PrimaryKey
@@ -13,7 +15,7 @@ data class Product(
     val name: String = "",
     val category: String = "",
     val expirationDate: String = "",
-    val quantity: Double = 0.0,
+    var quantity: Double = 0.0,
     val unit: String = "", // кг, шт, л
     val barcode: String = "",
     val imageUrl: String = "",
@@ -22,31 +24,24 @@ data class Product(
     val firebaseId: String? = null,
     val lastSynced: Long? = null,
     val isDeleted: Boolean = false,
-    val isMyProduct: Boolean = true, // Убедитесь что это поле есть
-    val userId: String = "" // Убедитесь что это поле есть
-) {
+    val isMyProduct: Boolean = true,
+    val userId: String = ""
+) : Parcelable {
 
     fun getDaysUntilExpiration(): Int {
         return try {
             val dateFormat = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
             val expiration = dateFormat.parse(expirationDate)
             val today = Calendar.getInstance().time
-
             if (expiration != null) {
-                val diff = expiration.time - today.time
-                val days = diff / (24 * 60 * 60 * 1000)
-                days.toInt()
-            } else {
-                -1
-            }
+                ((expiration.time - today.time) / (24 * 60 * 60 * 1000)).toInt()
+            } else -1
         } catch (e: Exception) {
             -1
         }
     }
 
-    fun isExpired(): Boolean {
-        return getDaysUntilExpiration() < 0
-    }
+    fun isExpired(): Boolean = getDaysUntilExpiration() < 0
 
     fun getExpirationColor(): Int {
         val daysLeft = getDaysUntilExpiration()

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="4dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp"
+    app:cardUseCompatPadding="true">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:background="#FFFFFF">
+
+        <!-- Фотография продукта слева -->
+        <ImageView
+            android:id="@+id/productImage"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:scaleType="centerCrop"
+            android:background="#F8F9FA"
+            android:contentDescription="Фото продукта"
+            android:src="@drawable/ic_default_food" />
+
+        <!-- Категория продукта -->
+        <TextView
+            android:id="@+id/productCategory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/productImage"
+            android:layout_alignTop="@+id/productImage"
+            android:layout_marginStart="12dp"
+            android:text="Категория"
+            android:textSize="12sp"
+            android:textColor="#718096"
+            android:textStyle="bold" />
+
+        <!-- Название продукта -->
+        <TextView
+            android:id="@+id/productName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/productImage"
+            android:layout_below="@+id/productCategory"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="4dp"
+            android:text="Название продукта"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#2D3748" />
+
+    </RelativeLayout>
+</androidx.cardview.widget.CardView>

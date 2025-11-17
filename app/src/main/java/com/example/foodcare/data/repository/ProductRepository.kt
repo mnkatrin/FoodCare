@@ -4,17 +4,18 @@ import com.example.foodcare.data.dao.ProductDao
 import com.example.foodcare.data.model.Category
 import com.example.foodcare.data.model.Product
 import com.example.foodcare.data.sync.FirebaseSyncManager
+import com.example.foodcare.data.remote.ProductsRemoteDataSource // <-- Импорт RemoteDataSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf // <-- Импорт для возврата результата поиска
 
-// --- УБРАНО: @Singleton, @Inject constructor ---
-// import javax.inject.Inject
-// import javax.inject.Singleton
-
-// Убираем аннотации
-class ProductRepository( // Убираем @Inject
-    val productDao: ProductDao, // Убираем private, если нужно получить доступ извне
-    val syncManager: FirebaseSyncManager // Убираем private, если нужно получить доступ извне
+// Убираем аннотации Hilt
+class ProductRepository(
+    val productDao: ProductDao,
+    val syncManager: FirebaseSyncManager,
+    // --- ДОБАВЛЕНО: ProductsRemoteDataSource ---
+    private val remoteDataSource: ProductsRemoteDataSource
+    // --- КОНЕЦ ДОБАВЛЕНИЯ ---
 ) {
 
     // СУЩЕСТВУЮЩИЕ МЕТОДЫ
@@ -42,78 +43,9 @@ class ProductRepository( // Убираем @Inject
         syncManager.syncIfNeeded()
     }
 
-    // ОБНОВЛЕННЫЙ МЕТОД - добавляем userId к примерам продуктов
-    suspend fun addSampleProducts() {
-        val existingProducts = productDao.getAllProducts().first()
-        if (existingProducts.isNotEmpty()) {
-            return
-        }
-
-        // Для примеров продуктов используем специальный userId
-        val sampleUserId = "sample_user"
-
-        val sampleProducts = listOf(
-            Product(
-                name = "Молоко",
-                category = "Молочные продукты",
-                expirationDate = "25.12.2024",
-                quantity = 1.0,
-                unit = "л",
-                isMyProduct = true,
-                userId = sampleUserId
-            ),
-            Product(
-                name = "Хлеб",
-                category = "Хлебобулочные изделия",
-                expirationDate = "20.12.2024",
-                quantity = 1.0,
-                unit = "шт",
-                isMyProduct = true,
-                userId = sampleUserId
-            ),
-            Product(
-                name = "Яйца",
-                category = "Яйца",
-                expirationDate = "30.12.2024",
-                quantity = 10.0,
-                unit = "шт",
-                isMyProduct = true,
-                userId = sampleUserId
-            ),
-            Product(
-                name = "Яблоки",
-                category = "Фрукты",
-                expirationDate = "28.12.2024",
-                quantity = 1.5,
-                unit = "кг",
-                isMyProduct = true,
-                userId = sampleUserId
-            ),
-            Product(
-                name = "Апельсиновый сок",
-                category = "Напитки",
-                expirationDate = "15.01.2025",
-                quantity = 1.0,
-                unit = "л",
-                isMyProduct = true,
-                userId = sampleUserId
-            ),
-            Product(
-                name = "Куриное филе",
-                category = "Мясо, птица",
-                expirationDate = "22.12.2024",
-                quantity = 0.5,
-                unit = "кг",
-                isMyProduct = true,
-                userId = sampleUserId
-            )
-        )
-
-        sampleProducts.forEach { product ->
-            productDao.insertProduct(product.copy(isDirty = true))
-        }
-        syncManager.syncIfNeeded()
-    }
+    // --- УБРАНО: addSampleProducts ---
+    // suspend fun addSampleProducts() { ... }
+    // --- КОНЕЦ УБРАНО ---
 
     fun getAllCategories(): Flow<List<Category>> = productDao.getAllCategories()
 
@@ -135,7 +67,8 @@ class ProductRepository( // Убираем @Inject
             Category("9", "Сладости"),
             Category("10", "Яйца"),
             Category("11", "Консервы"),
-            Category("12", "Прочее")
+            Category("12", "Прочее"),
+            Category("13", "Снэки")
         )
 
         defaultCategories.forEach { category ->
@@ -180,7 +113,51 @@ class ProductRepository( // Убираем @Inject
         return productDao.getProductsByCategoryAndUser(category, userId)
     }
 
-    // МЕТОДЫ ДЛЯ БУДУЩЕЙ ИНТЕГРАЦИИ С ИИ
+    // --- НОВЫЙ МЕТОД: Поиск продуктов через API ---
+    // ProductRepository.kt
+// ProductRepository.kt
+    suspend fun searchProducts(query: String): List<Product> {
+        if (query.isBlank()) return emptyList()
+
+        val apiResults = remoteDataSource.searchProducts(query)
+
+        return apiResults.map { apiProduct ->
+            val name = apiProduct.productNameRu
+                ?.takeIf { it.isNotBlank() }
+                ?: apiProduct.productName.orEmpty()
+
+            // Берём первую категорию, чистим и отбрасываем странные вроде "en:cheeses"
+            val rawCategory = apiProduct.categories
+                ?.split(',')
+                ?.map { it.trim() }
+                ?.firstOrNull()
+                .orEmpty()
+
+            val displayCategory = if (rawCategory.contains(":") || rawCategory.isBlank()) {
+                ""
+            } else {
+                rawCategory
+            }
+
+            Product(
+                name = name,
+                category = displayCategory,
+                expirationDate = "",
+                quantity = 0.0,
+                unit = "",
+                barcode = "",
+                imageUrl = apiProduct.imageUrl.orEmpty(),
+                isMyProduct = false,
+                userId = ""
+            )
+        }
+    }
+
+
+
+    private fun String?.orElseEmpty(): String = this ?: ""
+
+    // МЕТОДЫ ДЛЯ БУДУЩЕЙ ИНТЕГРАЦИИ С ИИ (оставляем как есть, но они не используются для поиска)
     suspend fun searchProductsWithAI(query: String, userId: String): List<Product> {
         // Пока используем обычный поиск, потом заменим на ИИ
         return productDao.searchProductsByUser(query, userId)

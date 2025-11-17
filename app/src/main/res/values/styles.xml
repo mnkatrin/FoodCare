@@ -1,0 +1,5 @@
+<resources>
+    <style name="SquareButton" parent="Widget.MaterialComponents.FloatingActionButton">
+        <item name="cornerRadius">0dp</item> <!-- Сделаем углы квадратными -->
+    </style>
+</resources>

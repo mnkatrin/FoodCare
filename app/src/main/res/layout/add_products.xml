@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- УБРАНО: <layout xmlns:android="http://schemas.android.com/apk/res/android" ... > -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -14,18 +15,9 @@
         android:backgroundTint="#E6FDFF"
         android:paddingTop="0dp">
 
-        <!-- Food Care заголовок -->
-        <ImageButton
-            android:id="@+id/backButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="3dp"
-            android:layout_marginTop="56dp"
-            android:backgroundTint="#00B61515"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/frame_47422" />
+        <!-- ==================== ШАПКА ==================== -->
 
+        <!-- Заголовок FoodCare -->
         <LinearLayout
             android:id="@+id/foodCareLayout"
             android:layout_width="wrap_content"
@@ -52,6 +44,18 @@
 
         </LinearLayout>
 
+        <!-- Кнопка Назад -->
+        <ImageButton
+            android:id="@+id/backButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="3dp"
+            android:layout_marginTop="56dp"
+            android:backgroundTint="#00B61515"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/frame_47422" />
+
         <!-- Заголовок "Добавить продукт" -->
         <TextView
             android:id="@+id/addProductTitle"
@@ -66,8 +70,10 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/foodCareLayout" />
 
-        <!-- Основной контейнер с полями ввода -->
-        <com.google.android.material.card.MaterialCardView
+        <!-- ==================== ОСНОВНОЙ КОНТЕНТ ==================== -->
+
+        <!-- Карточка с полями ввода -->
+        <LinearLayout
             android:id="@+id/inputCard"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -75,267 +81,257 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="20dp"
             android:layout_marginBottom="12dp"
-            app:cardBackgroundColor="#FFFFFF"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="4dp"
+            android:background="@drawable/rounded_card"
+            android:orientation="vertical"
+            android:padding="20dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/addProductTitle">
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/mulish_semibold"
+                android:text="Название продукта"
+                android:textColor="#000000"
+                android:textSize="15sp" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/productNameLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="16dp"
+                app:boxBackgroundMode="outline"
+                app:boxCornerRadiusBottomEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusTopStart="12dp"
+                app:boxStrokeColor="#2DC0FF">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/productNameEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@android:color/transparent"
+                    android:hint="Введите название"
+                    android:imeOptions="actionNext"
+                    android:maxLines="1"
+                    android:padding="14dp"
+                    android:textColor="#000000"
+                    android:textColorHint="#999999"
+                    android:textSize="15sp" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/mulish_semibold"
+                android:text="Категория"
+                android:textColor="#000000"
+                android:textSize="15sp" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/categoryLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="16dp"
+                app:boxBackgroundMode="outline"
+                app:boxCornerRadiusBottomEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusTopStart="12dp"
+                app:boxStrokeColor="#2DC0FF">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/categoryEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@android:color/transparent"
+                    android:hint="Выберите категорию"
+                    android:imeOptions="actionNext"
+                    android:maxLines="1"
+                    android:padding="14dp"
+                    android:textColor="#000000"
+                    android:textColorHint="#999999"
+                    android:textSize="15sp" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/mulish_semibold"
+                android:text="Конец срока годности"
+                android:textColor="#000000"
+                android:textSize="15sp" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/expiryDateLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="16dp"
+                app:boxBackgroundMode="outline"
+                app:boxCornerRadiusBottomEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusTopStart="12dp"
+                app:boxStrokeColor="#2DC0FF">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/expiryDateEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@android:color/transparent"
+                    android:hint="дд.мм.гггг"
+                    android:imeOptions="actionNext"
+                    android:inputType="date"
+                    android:maxLines="1"
+                    android:padding="14dp"
+                    android:textColor="#000000"
+                    android:textColorHint="#999999"
+                    android:textSize="15sp" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Секция: Количество и Единица измерения -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp">
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-                <!-- Название продукта -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/mulish_semibold"
-                    android:text="Название продукта"
-                    android:textColor="#000000"
-                    android:textSize="15sp" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/productNameLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:layout_marginBottom="16dp"
-                    app:boxBackgroundMode="outline"
-                    app:boxCornerRadiusBottomEnd="12dp"
-                    app:boxCornerRadiusBottomStart="12dp"
-                    app:boxCornerRadiusTopEnd="12dp"
-                    app:boxCornerRadiusTopStart="12dp"
-                    app:boxStrokeColor="#2DC0FF">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/productNameEditText"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:backgroundTint="@android:color/transparent"
-                        android:hint="Введите название"
-                        android:imeOptions="actionNext"
-                        android:maxLines="1"
-                        android:padding="14dp"
-                        android:textColor="#000000"
-                        android:textColorHint="#999999"
-                        android:textSize="15sp" />
-
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <!-- Категория -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/mulish_semibold"
-                    android:text="Категория"
-                    android:textColor="#000000"
-                    android:textSize="15sp" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/categoryLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:layout_marginBottom="16dp"
-                    app:boxBackgroundMode="outline"
-                    app:boxCornerRadiusBottomEnd="12dp"
-                    app:boxCornerRadiusBottomStart="12dp"
-                    app:boxCornerRadiusTopEnd="12dp"
-                    app:boxCornerRadiusTopStart="12dp"
-                    app:boxStrokeColor="#2DC0FF">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/categoryEditText"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:backgroundTint="@android:color/transparent"
-                        android:hint="Выберите категорию"
-                        android:imeOptions="actionNext"
-                        android:maxLines="1"
-                        android:padding="14dp"
-                        android:textColor="#000000"
-                        android:textColorHint="#999999"
-                        android:textSize="15sp" />
-
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <!-- Конец срока годности -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/mulish_semibold"
-                    android:text="Конец срока годности"
-                    android:textColor="#000000"
-                    android:textSize="15sp" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/expiryDateLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:layout_marginBottom="16dp"
-                    app:boxBackgroundMode="outline"
-                    app:boxCornerRadiusBottomEnd="12dp"
-                    app:boxCornerRadiusBottomStart="12dp"
-                    app:boxCornerRadiusTopEnd="12dp"
-                    app:boxCornerRadiusTopStart="12dp"
-                    app:boxStrokeColor="#2DC0FF">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/expiryDateEditText"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:backgroundTint="@android:color/transparent"
-                        android:hint="дд.мм.гггг"
-                        android:imeOptions="actionNext"
-                        android:inputType="date"
-                        android:maxLines="1"
-                        android:padding="14dp"
-                        android:textColor="#000000"
-                        android:textColorHint="#999999"
-                        android:textSize="15sp" />
-
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <!-- Количество и единица измерения -->
+                <!-- Секция: Количество (с кнопками +/-) -->
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:layout_marginEnd="10dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
-                    <!-- Количество с селектором -->
-                    <LinearLayout
-                        android:layout_width="0dp"
+                    <TextView
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="10dp"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:fontFamily="@font/mulish_semibold"
+                        android:text="Количество"
+                        android:textColor="#000000"
+                        android:textSize="15sp" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="@font/mulish_semibold"
-                            android:text="Количество"
-                            android:textColor="#000000"
-                            android:textSize="15sp" />
-
-                        <!-- Контейнер для счетчика количества с иконками -->
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="60dp"
-                            android:layout_marginTop="6dp"
-                            android:background="#FFFFFF"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal"
-                            android:padding="8dp">
-
-                            <!-- Кнопка уменьшения с иконкой минуса -->
-                            <com.google.android.material.button.MaterialButton
-                                android:id="@+id/decreaseQuantityButton"
-                                android:layout_width="38dp"
-                                android:layout_height="38dp"
-                                android:backgroundTint="#2DC0FF"
-                                android:insetTop="0dp"
-                                android:insetBottom="0dp"
-                                app:cornerRadius="24dp"
-                                app:icon="@drawable/ic_minus"
-                                app:iconGravity="textStart"
-                                app:iconPadding="0dp" />
-
-                            <!-- Отображение текущего количества -->
-                            <TextView
-                                android:id="@+id/quantityTextView"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:gravity="center"
-                                android:text="1"
-                                android:textColor="#000000"
-                                android:textSize="20sp"
-                                android:textStyle="bold" />
-
-                            <!-- Кнопка увеличения с иконкой плюса -->
-                            <com.google.android.material.button.MaterialButton
-                                android:id="@+id/increaseQuantityButton"
-                                android:layout_width="38dp"
-                                android:layout_height="38dp"
-                                android:backgroundTint="#2DC0FF"
-                                android:insetTop="0dp"
-                                android:insetBottom="0dp"
-                                app:cornerRadius="24dp"
-                                app:icon="@drawable/ic_plus"
-                                app:iconGravity="textStart"
-                                app:iconPadding="0dp" />
-
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-                    <!-- Единица измерения - ВЫПАДАЮЩИЙ СПИСОК -->
+                    <!-- Контейнер для счетчика количества -->
                     <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="10dp"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:layout_width="match_parent"
+                        android:layout_height="60dp"
+                        android:layout_marginTop="6dp"
+                        android:background="#FFFFFF"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="8dp">
 
+                        <!-- Кнопка уменьшения -->
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/decreaseQuantityButton"
+                            android:layout_width="38dp"
+                            android:layout_height="38dp"
+                            android:backgroundTint="#2DC0FF"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            app:cornerRadius="24dp"
+                            app:icon="@drawable/ic_minus"
+                            app:iconGravity="textStart"
+                            app:iconPadding="0dp" />
+
+                        <!-- Отображение текущего количества -->
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:id="@+id/quantityTextView"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:fontFamily="@font/mulish_semibold"
-                            android:text="Единица"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="1"
                             android:textColor="#000000"
-                            android:textSize="15sp" />
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
 
-                        <!-- AutoCompleteTextView для выбора единиц измерения -->
-                        <com.google.android.material.textfield.TextInputLayout
-                            android:id="@+id/unitLayout"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="6dp"
-                            app:boxBackgroundMode="outline"
-                            app:boxCornerRadiusBottomEnd="12dp"
-                            app:boxCornerRadiusBottomStart="12dp"
-                            app:boxCornerRadiusTopEnd="12dp"
-                            app:boxCornerRadiusTopStart="12dp"
-                            app:boxStrokeColor="#2DC0FF"
-                            app:endIconMode="dropdown_menu">
-
-                            <AutoCompleteTextView
-                                android:id="@+id/unitEditText"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:backgroundTint="@android:color/transparent"
-                                android:hint="Выберите единицу"
-                                android:imeOptions="actionDone"
-                                android:maxLines="1"
-                                android:padding="14dp"
-                                android:textColor="#000000"
-                                android:textColorHint="#999999"
-                                android:textSize="15sp"
-                                android:completionThreshold="1" />
-
-                        </com.google.android.material.textfield.TextInputLayout>
+                        <!-- Кнопка увеличения -->
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/increaseQuantityButton"
+                            android:layout_width="38dp"
+                            android:layout_height="38dp"
+                            android:backgroundTint="#2DC0FF"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            app:cornerRadius="24dp"
+                            app:icon="@drawable/ic_plus"
+                            app:iconGravity="textStart"
+                            app:iconPadding="0dp" />
 
                     </LinearLayout>
 
                 </LinearLayout>
 
+                <!-- Секция: Единица измерения (выпадающий список) -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/mulish_semibold"
+                        android:text="Единица"
+                        android:textColor="#000000"
+                        android:textSize="15sp" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/unitLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        app:boxBackgroundMode="outline"
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxStrokeColor="#2DC0FF"
+                        app:endIconMode="dropdown_menu">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/unitEditText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:backgroundTint="@android:color/transparent"
+                            android:hint="Выберите единицу"
+                            android:imeOptions="actionDone"
+                            android:maxLines="1"
+                            android:padding="14dp"
+                            android:textColor="#000000"
+                            android:textColorHint="#999999"
+                            android:textSize="15sp"
+                            android:completionThreshold="1" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </LinearLayout>
+
             </LinearLayout>
 
-        </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
 
-        <!-- 1. Кнопка "Добавить фотографию" -->
+        <!-- ==================== КНОПКИ ==================== -->
+
+        <!-- Кнопка "Добавить фотографию" -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/addPhotoButtonMain"
             android:layout_width="0dp"
             android:layout_height="52dp"
             android:layout_marginStart="32dp"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="8dp"
             android:layout_marginEnd="32dp"
             android:backgroundTint="#2DC0FF"
             android:fontFamily="@font/mulish_bold"
@@ -347,13 +343,13 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/inputCard" />
 
-        <!-- 2. Кнопка "Добавить штрих-код" -->
+        <!-- Кнопка "Добавить штрих-код" -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/addBarcodeButton"
             android:layout_width="0dp"
             android:layout_height="52dp"
             android:layout_marginStart="32dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="4dp"
             android:layout_marginEnd="32dp"
             android:backgroundTint="#2DC0FF"
             android:fontFamily="@font/mulish_bold"
@@ -365,7 +361,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/addPhotoButtonMain" />
 
-        <!-- 3. Кнопка "Сохранить продукт" -->
+        <!-- Кнопка "Сохранить продукт" -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/saveButton"
             android:layout_width="0dp"
@@ -385,7 +381,8 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/addBarcodeButton" />
 
-        <!-- FrameLayout как НАЛОЖЕНИЕ -->
+        <!-- ==================== НИЖНЯЯ ПАНЕЛЬ (НАЛОЖЕНИЕ) ==================== -->
+
         <FrameLayout
             android:id="@+id/bottomFrame"
             android:layout_width="0dp"
@@ -404,7 +401,7 @@
                 android:scaleType="fitEnd"
                 app:srcCompat="@drawable/frame_180" />
 
-            <!-- Кнопка профиля -->
+            <!-- Кнопка профиля (правый нижний угол) -->
             <Button
                 android:id="@+id/profileButton"
                 android:layout_width="55dp"
@@ -429,7 +426,7 @@
                 android:layout_marginTop="30dp"
                 android:background="@drawable/frame_47417__1_" />
 
-            <!-- Дополнительные кнопки как в оригинале -->
+            <!-- Дополнительные кнопки в нижней панели (оставлены без изменений) -->
             <Button
                 android:id="@+id/Button4"
                 android:layout_width="55dp"
@@ -476,14 +473,14 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Затемнение для профиля - ПОВЕРХ ВСЕГО КОНТЕНТА -->
+    <!-- Затемнение фона (для профиля или других модальных действий) -->
     <View
         android:id="@+id/backgroundDim"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#80000000"
-        android:visibility="gone"
         android:clickable="true"
-        android:focusable="true" />
+        android:focusable="true"
+        android:visibility="gone" />
 
-</FrameLayout>
+</FrameLayout> <!-- УБРАНО: </layout> -->

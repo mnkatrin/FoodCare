@@ -1,23 +1,18 @@
-// ui/app_product/ProductsViewModel.kt
-package com.example.foodcare.ui.products // Убедись, что пакет правильный
+package com.example.foodcare.ui.products
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider // <-- Добавлен импорт
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.foodcare.data.model.Product
 import com.example.foodcare.data.repository.ProductRepository
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-// Убираем аннотации Hilt
-// import dagger.hilt.android.lifecycle.HiltViewModel
-// import javax.inject.Inject
-
-// Убираем аннотации Hilt
-// @HiltViewModel
-class ProductsViewModel( // Убираем @Inject
+class ProductsViewModel(
     private val repository: ProductRepository
 ) : ViewModel() {
 
@@ -44,11 +39,13 @@ class ProductsViewModel( // Убираем @Inject
         }
     }
 
-    fun addSampleProducts() {
-        viewModelScope.launch {
-            repository.addSampleProducts()
-        }
-    }
+    // --- УБРАНО: Вызов addSampleProducts ---
+    // fun addSampleProducts() {
+    //     viewModelScope.launch {
+    //         repository.addSampleProducts()
+    //     }
+    // }
+    // --- КОНЕЦ УБРАНО ---
 
     fun updateProductQuantity(product: Product, newQuantity: String) {
         viewModelScope.launch {
@@ -57,7 +54,7 @@ class ProductsViewModel( // Убираем @Inject
                 val quantityValue = newQuantity.replace("[^\\d.]".toRegex(), "").toDoubleOrNull() ?: 0.0
 
                 val updatedProduct = product.copy(
-                    quantity = quantityValue, // Передаем Double, а не String
+                    quantity = quantityValue,
                     isDirty = true
                 )
                 repository.updateProduct(updatedProduct)
@@ -79,14 +76,33 @@ class ProductsViewModel( // Убираем @Inject
                 name = name,
                 category = category,
                 expirationDate = expirationDate,
-                quantity = quantity, // Уже Double
+                quantity = quantity,
                 unit = unit
             )
             repository.addProduct(product)
         }
     }
 
-    // --- ДОБАВИТЬ: Внутренний Factory ---
+    // --- ДОБАВЛЕНО: Метод для получения недавно добавленных продуктов ---
+    fun getRecentlyAddedProducts(limit: Int): Flow<List<Product>> {
+        return products.map { allProducts ->
+            allProducts
+                .filter { product -> product.isMyProduct }
+                .sortedByDescending { product -> product.createdAt }
+                .take(limit)
+        }
+    }
+    // --- КОНЕЦ ДОБАВЛЕНИЯ ---
+
+    // --- ДОБАВЛЕНО: Метод для обновления продукта ---
+    fun updateProduct(product: Product) {
+        viewModelScope.launch {
+            repository.updateProduct(product)
+        }
+    }
+    // --- КОНЕЦ ДОБАВЛЕНИЯ ---
+
+    // --- ДОБАВЛЕНО: Внутренний Factory ---
     companion object {
         fun provideFactory(
             productRepository: ProductRepository

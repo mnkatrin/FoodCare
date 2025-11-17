@@ -1,6 +1,7 @@
-package com.example.foodcare.ui.add_products
+package com.example.foodcare.ui.app_product
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider // <-- ДОБАВЛЕН ИМПОРТ
 import androidx.lifecycle.viewModelScope
 import com.example.foodcare.data.model.Product
 import com.example.foodcare.data.repository.ProductRepository
@@ -16,7 +17,6 @@ class AddProductFormViewModel(
         }
     }
 
-    // Получение списка категорий (можно расширить для работы с БД)
     fun getCategories(): List<String> {
         return listOf(
             "Напитки",
@@ -32,5 +32,19 @@ class AddProductFormViewModel(
             "Соусы и приправы",
             "Рыба и морепродукты"
         )
+    }
+
+    companion object {
+        fun provideFactory(
+            productRepository: ProductRepository
+        ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                if (modelClass.isAssignableFrom(AddProductFormViewModel::class.java)) {
+                    return AddProductFormViewModel(productRepository) as T
+                }
+                throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
+            }
+        }
     }
 }

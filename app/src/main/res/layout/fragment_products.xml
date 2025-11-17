@@ -38,7 +38,7 @@
 
     <!-- Кнопка назад -->
     <ImageButton
-        android:id="@+id/imageButton"
+        android:id="@+id/backButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="3dp"
@@ -61,14 +61,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/foodCareLayout" />
 
-    <!-- Empty State (добавлен только этот блок) -->
+    <!-- Empty State -->
     <TextView
         android:id="@+id/emptyState"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Продуктов пока нет"
         android:textSize="16sp"
-        android:textColor="#666"
+        android:textColor="#888888"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -123,7 +123,7 @@
             android:scaleType="fitEnd"
             app:srcCompat="@drawable/frame_180" />
 
-        <!-- Кнопка профиля -->
+        <!-- Кнопки нижней панели -->
         <Button
             android:id="@+id/Button4"
             android:layout_width="55dp"
@@ -193,7 +193,7 @@
 
     </FrameLayout>
 
-    <!-- Затемнение фона для профиля - ДОЛЖНО БЫТЬ ПОСЛЕДНИМ -->
+    <!-- Затемнение фона для профиля -->
     <View
         android:id="@+id/backgroundDim"
         android:layout_width="match_parent"

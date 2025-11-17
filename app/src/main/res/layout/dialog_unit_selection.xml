@@ -1,33 +1,28 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="#FFFFFF"
     android:padding="16dp">
 
-    <!-- Заголовок -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Выберите единицу измерения"
+        android:text="Выберите категорию"
         android:textSize="20sp"
         android:textStyle="bold"
         android:textColor="#000000"
         android:gravity="center"
         android:layout_marginBottom="16dp" />
 
-    <!-- Список единиц измерения -->
     <ListView
-        android:id="@+id/unitListView"
+        android:id="@+id/categoryListView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:divider="#EEEEEE"
         android:dividerHeight="1dp" />
 
-    <!-- Кнопка закрытия -->
     <Button
         android:id="@+id/closeButton"
         android:layout_width="match_parent"
@@ -37,5 +32,4 @@
         android:textColor="#2DC0FF"
         android:background="@android:color/transparent"
         android:textSize="16sp" />
-
 </LinearLayout>
