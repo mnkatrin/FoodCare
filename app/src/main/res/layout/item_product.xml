@@ -65,7 +65,11 @@
             android:textSize="11sp"
             android:textStyle="bold"
             android:paddingVertical="4dp"
-            android:paddingHorizontal="8dp" />
+            android:paddingHorizontal="8dp"
+            android:textColor="#2DC0FF"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?android:attr/selectableItemBackground" />
 
         <!-- Счетчик количества -->
         <LinearLayout

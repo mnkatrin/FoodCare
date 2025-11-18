@@ -49,12 +49,15 @@
         app:srcCompat="@drawable/frame_47422" />
 
     <!-- Кнопка добавить продукт -->
+
+    <!-- Карточка с полем поиска -->
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/addProductButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="168dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginStart="156dp"
+        android:layout_marginTop="12dp"
         android:background="@android:color/transparent"
         android:fontFamily="@font/mulish_bold"
         android:text="Добавить продукт"
@@ -67,7 +70,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/foodCareLayout" />
 
-    <!-- Карточка с полем поиска -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/searchCard"
         android:layout_width="0dp"

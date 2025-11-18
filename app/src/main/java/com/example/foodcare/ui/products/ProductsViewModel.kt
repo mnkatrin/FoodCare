@@ -5,31 +5,33 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.foodcare.data.model.Product
 import com.example.foodcare.data.repository.ProductRepository
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class ProductsViewModel(
     private val repository: ProductRepository
 ) : ViewModel() {
 
+    // Состояние для списка продуктов
     private val _products = MutableStateFlow<List<Product>>(emptyList())
-    val products: StateFlow<List<Product>> = _products.asStateFlow()
+    val products: StateFlow<List<Product>> = _products
 
+    // Состояние загрузки
     private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+    val isLoading: StateFlow<Boolean> = _isLoading
 
+    // Инициализация: Загружаем все продукты
     init {
         loadProducts()
     }
 
+    // Загрузка всех продуктов
     fun loadProducts() {
         viewModelScope.launch {
             _isLoading.value = true
             try {
+                // Получаем все продукты из репозитория
                 repository.getAllProducts().collect { productsList ->
                     _products.value = productsList
                 }
@@ -39,37 +41,37 @@ class ProductsViewModel(
         }
     }
 
-    // --- УБРАНО: Вызов addSampleProducts ---
-    // fun addSampleProducts() {
-    //     viewModelScope.launch {
-    //         repository.addSampleProducts()
-    //     }
-    // }
-    // --- КОНЕЦ УБРАНО ---
-
-    fun updateProductQuantity(product: Product, newQuantity: String) {
+    // Обновление информации о продукте
+    fun updateProduct(product: Product) {
         viewModelScope.launch {
             try {
-                // Парсим строку в Double
-                val quantityValue = newQuantity.replace("[^\\d.]".toRegex(), "").toDoubleOrNull() ?: 0.0
-
-                val updatedProduct = product.copy(
-                    quantity = quantityValue,
-                    isDirty = true
-                )
-                repository.updateProduct(updatedProduct)
+                // Обновляем продукт в репозитории
+                repository.updateProduct(product)
+                // После обновления, пересчитываем список продуктов
+                loadProducts()
             } catch (e: Exception) {
-                // Обработка ошибки парсинга
+                // Обработка ошибок
+                e.printStackTrace()
             }
         }
     }
 
+    // Удаление продукта
     fun deleteProduct(product: Product) {
         viewModelScope.launch {
-            repository.deleteProduct(product)
+            try {
+                // Удаляем продукт из репозитория
+                repository.deleteProduct(product)
+                // После удаления, пересчитываем список продуктов
+                loadProducts()
+            } catch (e: Exception) {
+                // Обработка ошибок
+                e.printStackTrace()
+            }
         }
     }
 
+    // Добавление нового продукта
     fun addNewProduct(name: String, category: String, expirationDate: String, quantity: Double, unit: String) {
         viewModelScope.launch {
             val product = Product(
@@ -79,30 +81,25 @@ class ProductsViewModel(
                 quantity = quantity,
                 unit = unit
             )
-            repository.addProduct(product)
+            try {
+                // Добавляем новый продукт в репозиторий
+                repository.addProduct(product)
+                // После добавления, пересчитываем список продуктов
+                loadProducts()
+            } catch (e: Exception) {
+                // Обработка ошибок
+                e.printStackTrace()
+            }
         }
     }
 
-    // --- ДОБАВЛЕНО: Метод для получения недавно добавленных продуктов ---
-    fun getRecentlyAddedProducts(limit: Int): Flow<List<Product>> {
-        return products.map { allProducts ->
-            allProducts
-                .filter { product -> product.isMyProduct }
-                .sortedByDescending { product -> product.createdAt }
-                .take(limit)
-        }
-    }
-    // --- КОНЕЦ ДОБАВЛЕНИЯ ---
+    // Функция для получения недавно добавленных продуктов
+    fun getRecentlyAddedProducts(limit: Int) = products.value
+        .filter { it.isMyProduct }
+        .sortedByDescending { it.createdAt }
+        .take(limit)
 
-    // --- ДОБАВЛЕНО: Метод для обновления продукта ---
-    fun updateProduct(product: Product) {
-        viewModelScope.launch {
-            repository.updateProduct(product)
-        }
-    }
-    // --- КОНЕЦ ДОБАВЛЕНИЯ ---
-
-    // --- ДОБАВЛЕНО: Внутренний Factory ---
+    // Фабрика для создания ViewModel с передачей зависимости (ProductRepository)
     companion object {
         fun provideFactory(
             productRepository: ProductRepository
@@ -116,5 +113,4 @@ class ProductsViewModel(
             }
         }
     }
-    // --- КОНЕЦ ДОБАВЛЕНИЯ ---
 }

@@ -30,13 +30,10 @@ class AddProductSearchFragment : Fragment() {
     private lateinit var searchInput: AutoCompleteTextView
     private lateinit var addProductButton: MaterialButton
     private lateinit var backButton: View
-
     private lateinit var recentProductsRecyclerView: RecyclerView
     private lateinit var noRecentProductsText: TextView
-
     private lateinit var searchAdapter: ProductSearchResultAdapter
     private lateinit var recentAdapter: RecentProductsAdapter
-
     private var searchPopup: PopupWindow? = null
 
     override fun onCreateView(
@@ -187,12 +184,22 @@ class AddProductSearchFragment : Fragment() {
             "Сладости",
             "Яйца",
             "Консервы",
-            "Прочее",
-            "Снэки"
+            "Снэки",
+            "Прочее"
+
         )
 
         val categoryAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, categories)
         categoryEditText.setAdapter(categoryAdapter)
+
+        categoryEditText.setOnClickListener {
+            androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setTitle("Выберите категорию")
+                .setItems(categories.toTypedArray()) { _, which ->
+                    categoryEditText.setText(categories[which])
+                }
+                .show()
+        }
 
         val rawCategory = product.category.trim()
         if (rawCategory.isNotEmpty()) {
@@ -294,3 +301,5 @@ class AddProductSearchFragment : Fragment() {
         searchPopup = null
     }
 }
+
+

@@ -10,40 +10,43 @@ import android.widget.ListView
 import androidx.fragment.app.DialogFragment
 import com.example.foodcare.R
 
-class CategorySelectionDialogFragment(
-    private val categories: List<String>,  // Список категорий
-    private val onCategorySelected: (String) -> Unit // Функция, которая будет вызвана при выборе категории
-) : DialogFragment() {
+class CategorySelectionDialogFragment : DialogFragment() {
 
     private lateinit var categoryListView: ListView
+    private lateinit var closeButton: Button
+    private var categorySelectedListener: ((String) -> Unit)? = null
+
+    private val categories = listOf(
+        "Молочные продукты", "Мясо, птица", "Овощи", "Фрукты", "Напитки",
+        "Хлебобулочные изделия", "Бакалея", "Замороженные продукты", "Сладости",
+        "Яйца", "Консервы", "Прочее", "Снэки"
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.dialog_category_selection, container, false)
 
-        // Инициализация ListView
         categoryListView = view.findViewById(R.id.categoryListView)
-        val closeButton: Button = view.findViewById(R.id.closeButton)
+        closeButton = view.findViewById(R.id.closeButton)
 
-        // Настройка адаптера для ListView с категориями
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, categories)
         categoryListView.adapter = adapter
 
-        // Обработка клика по элементу списка
         categoryListView.setOnItemClickListener { _, _, position, _ ->
-            val selectedCategory = categories[position]
-            onCategorySelected(selectedCategory)  // Отправляем выбранную категорию обратно
-            dismiss()  // Закрываем диалог
+            categorySelectedListener?.invoke(categories[position])
+            dismiss() // Закрыть диалог после выбора категории
         }
 
-        // Кнопка закрытия
         closeButton.setOnClickListener {
-            dismiss()  // Просто закрываем диалог
+            dismiss() // Закрыть диалог
         }
 
         return view
+    }
+
+    fun setCategorySelectedListener(listener: (String) -> Unit) {
+        categorySelectedListener = listener
     }
 }
