@@ -9,13 +9,13 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.drawerlayout.widget.DrawerLayout
 import com.example.foodcare.FoodCareApplication
-import com.example.foodcare.auth.UserManager
 import com.example.foodcare.R
+import com.example.foodcare.auth.UserManager
 import com.example.foodcare.databinding.ActivityMainBinding
+import com.example.foodcare.ui.app_product.AddProductFragment
+import com.example.foodcare.ui.app_product.AddProductSearchFragment
 import com.example.foodcare.ui.auth.LoginActivity
 import com.example.foodcare.ui.base.FullScreenActivity
-import com.example.foodcare.ui.app_product.AddProductSearchFragment
-import com.example.foodcare.ui.app_product.AddProductFragment
 import com.example.foodcare.ui.products.ProductsFragment
 import com.example.foodcare.ui.profile.ProfileFragment
 
@@ -73,7 +73,7 @@ class MainActivity : FullScreenActivity() {
         sharedPreferences = getSharedPreferences("app_prefs", MODE_PRIVATE)
         checkFirstLaunch()
 
-        // Настройка кнопок
+        // Настройка кнопок (после измерения layout)
         binding.root.post {
             setupDraggableButton()
         }
@@ -110,12 +110,12 @@ class MainActivity : FullScreenActivity() {
             // Тут можешь повесить нужное действие
         }
 
-        // 🔹 Кнопка Button4 - открываем экран ПОИСКА (fragment_add_product)
+        // Кнопка Button4 - открыть экран ПОИСКА продуктов
         binding.Button4.setOnClickListener {
             openAddProductSearchFragment()
         }
 
-        // Кнопка профиля - открываем Drawer слева
+        // Кнопка профиля - открыть Drawer
         binding.profileButton.setOnClickListener {
             openProfile()
         }
@@ -130,9 +130,14 @@ class MainActivity : FullScreenActivity() {
         }
     }
 
-    // 🔹 СДЕЛАЛИ ПУБЛИЧНЫМ, ЧТОБЫ МОЖНО БЫЛО ВЫЗЫВАТЬ ИЗ ФРАГМЕНТА
+    /** Открыть профиль (Drawer) из Activity */
     fun openProfile() {
         drawerLayout.openDrawer(binding.profileContainer)
+    }
+
+    /** Обёртка, чтобы вызывать из фрагментов старым методом */
+    fun openProfileFromFragment() {
+        openProfile()
     }
 
     /**
@@ -151,7 +156,7 @@ class MainActivity : FullScreenActivity() {
     }
 
     /**
-     * 🔹 Экран ПОИСКА продуктов
+     * Экран ПОИСКА продуктов
      */
     private fun openAddProductSearchFragment() {
         hideMainContent()

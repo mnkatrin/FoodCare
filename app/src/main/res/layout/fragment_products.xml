@@ -89,6 +89,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/frame_11" />
 
+    <!-- RecyclerView для списка продуктов -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/productsRecyclerView"
         android:layout_width="458dp"
@@ -105,6 +106,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.675" />
 
+    <!-- Нижняя панель с кнопками -->
     <FrameLayout
         android:id="@+id/bottomFrame"
         android:layout_width="0dp"

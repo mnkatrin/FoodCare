@@ -4,8 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.foodcare.databinding.ActivityProfileDrawerBinding
 import androidx.fragment.app.Fragment
+import com.example.foodcare.R
+import com.example.foodcare.history.HistoryFragment  // Импортируйте ваш фрагмент истории
+import com.example.foodcare.databinding.ActivityProfileDrawerBinding
 import com.google.firebase.auth.FirebaseAuth
 
 class ProfileFragment : Fragment() {
@@ -61,100 +63,20 @@ class ProfileFragment : Fragment() {
     }
 
     private fun setupClickListeners() {
+        // Обработчик для кнопки истории
         binding.historyButton.setOnClickListener {
-            showToast("История в разработке")
-        }
-
-        binding.allergensButton.setOnClickListener {
-            showToast("Аллергены в разработке")
-        }
-
-        binding.themeButton.setOnClickListener {
-            showToast("Тема приложения в разработке")
+            // Открываем фрагмент истории
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, HistoryFragment())  // Замените на правильный контейнер
+                .addToBackStack(null)  // Добавляем в стек возврата
+                .commit()
         }
 
         binding.logoutButton.setOnClickListener {
             profileListener?.onLogoutRequested()
         }
 
-        binding.userNameCard.setOnClickListener {
-            enableNameEditing()
-        }
-
-        binding.userNameEditText.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE) {
-                saveUserName()
-                true
-            } else {
-                false
-            }
-        }
-
-        binding.userNameEditText.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
-                saveUserName()
-            }
-        }
-    }
-
-    private fun enableNameEditing() {
-        binding.userNameEditText.apply {
-            isFocusable = true
-            isFocusableInTouchMode = true
-            setCursorVisible(true)
-            requestFocus()
-
-            val inputMethodManager = requireContext().getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
-            inputMethodManager.showSoftInput(this, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
-            setSelection(text.length)
-        }
-    }
-
-    private fun saveUserName() {
-        val newName = binding.userNameEditText.text.toString().trim()
-
-        if (newName.isEmpty()) {
-            setupUserData()
-            resetNameEditing()
-            return
-        }
-
-        val inputMethodManager = requireContext().getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
-        inputMethodManager.hideSoftInputFromWindow(binding.userNameEditText.windowToken, 0)
-
-        resetNameEditing()
-        updateUserName(newName)
-    }
-
-    private fun resetNameEditing() {
-        binding.userNameEditText.apply {
-            isFocusable = false
-            isFocusableInTouchMode = false
-            setCursorVisible(false)
-            clearFocus()
-        }
-    }
-
-    private fun updateUserName(newName: String) {
-        val currentUser = auth.currentUser
-
-        if (currentUser != null) {
-            val profileUpdates = com.google.firebase.auth.UserProfileChangeRequest.Builder()
-                .setDisplayName(newName)
-                .build()
-
-            currentUser.updateProfile(profileUpdates)
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        showToast("Имя обновлено")
-                    } else {
-                        showToast("Ошибка обновления имени")
-                        setupUserData()
-                    }
-                }
-        } else {
-            setupUserData()
-        }
+        // Другие кнопки и действия
     }
 
     private fun showToast(message: String) {

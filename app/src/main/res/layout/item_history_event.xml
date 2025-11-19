@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginTop="4dp"
+    android:layout_marginBottom="4dp"
+    app:cardCornerRadius="16dp"
+    app:cardUseCompatPadding="true"
+    app:cardElevation="2dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp"
+        android:background="#FFFFFF">
+
+        <!-- Иконка / фото продукта -->
+        <ImageView
+            android:id="@+id/historyProductImage"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:scaleType="centerCrop"
+            android:background="#F3F4F6"
+            android:src="@drawable/ic_food_placeholder" />
+
+        <!-- Название продукта -->
+        <TextView
+            android:id="@+id/historyProductName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/historyProductImage"
+            android:layout_alignTop="@id/historyProductImage"
+            android:layout_marginStart="12dp"
+            android:text="Апельсиновый сок"
+            android:textSize="15sp"
+            android:textColor="#111827"
+            android:textStyle="bold" />
+
+        <!-- Дата / время события -->
+        <TextView
+            android:id="@+id/historyDateText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignTop="@id/historyProductName"
+            android:text="12.02.2025"
+            android:textSize="11sp"
+            android:textColor="#6B7280" />
+
+        <!-- Описание действия: использовано / выброшено / добавлено -->
+        <TextView
+            android:id="@+id/historyActionText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/historyProductName"
+            android:layout_toEndOf="@id/historyProductImage"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="4dp"
+            android:text="Использовано 0.5 л"
+            android:textSize="13sp"
+            android:textColor="#4B5563" />
+
+        <!-- Чип статуса (фон подставляем в адаптере: used / discarded) -->
+        <TextView
+            android:id="@+id/historyStatusChip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/historyActionText"
+            android:layout_alignParentEnd="true"
+            android:layout_marginStart="8dp"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:text="Использовано"
+            android:textSize="11sp"
+            android:textColor="#10B981"
+            android:background="@drawable/bg_history_chip_used" />
+
+    </RelativeLayout>
+
+</androidx.cardview.widget.CardView>

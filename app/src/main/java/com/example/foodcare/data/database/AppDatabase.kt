@@ -1,18 +1,28 @@
 package com.example.foodcare.data.database
 
 import android.content.Context
-import androidx.room.*
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import com.example.foodcare.data.dao.HistoryDao
 import com.example.foodcare.data.dao.ProductDao
 import com.example.foodcare.data.model.Category
+import com.example.foodcare.data.model.HistoryEvent
 import com.example.foodcare.data.model.Product
 
 @Database(
-    entities = [Product::class, Category::class],
-    version = 4,
+    entities = [
+        Product::class,
+        Category::class,
+        HistoryEvent::class
+    ],
+    version = 5,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
+
     abstract fun productDao(): ProductDao
+    abstract fun historyDao(): HistoryDao
 
     companion object {
         @Volatile
@@ -24,7 +34,9 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "foodcare_database"
-                ).fallbackToDestructiveMigration()
+                )
+                    // ВАЖНО: эта строка ОБЯЗАТЕЛЬНО должна быть
+                    .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
                 instance

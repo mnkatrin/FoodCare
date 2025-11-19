@@ -55,6 +55,7 @@ class ProductsAdapter(
             Glide.with(holder.itemView.context)
                 .load(product.imageUrl)
                 .placeholder(R.drawable.ic_food_placeholder)
+                .error(R.drawable.ic_food_placeholder)
                 .into(holder.productImage)
         } else {
             holder.productImage.setImageResource(R.drawable.ic_food_placeholder)
@@ -98,6 +99,7 @@ class ProductsAdapter(
                 else
                     String.format("%.1f", newValue)
 
+            // Обновление в модели
             onQuantityChange(product, newValue)
         }
 
@@ -111,15 +113,18 @@ class ProductsAdapter(
                 else
                     String.format("%.1f", newValue)
 
+            // Обновление в модели
             onQuantityChange(product, newValue)
         }
     }
 
+    // Обновление списка продуктов
     fun updateProducts(newProducts: List<Product>) {
         items.clear()
         items.addAll(newProducts)
         notifyDataSetChanged()
     }
 
+    // Получаем продукт по позиции
     fun getProductAt(position: Int): Product = items[position]
 }
