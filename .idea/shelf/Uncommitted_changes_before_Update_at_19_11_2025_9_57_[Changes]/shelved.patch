@@ -1,0 +1,26 @@
+Index: app/src/main/res/layout/dialog_unit_selection.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><LinearLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    android:layout_width=\"match_parent\"\r\n    android:layout_height=\"match_parent\"\r\n    android:orientation=\"vertical\"\r\n    android:background=\"#FFFFFF\"\r\n    android:padding=\"16dp\">\r\n\r\n    <TextView\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:text=\"Выберите категорию\"\r\n        android:textSize=\"20sp\"\r\n        android:textStyle=\"bold\"\r\n        android:textColor=\"#000000\"\r\n        android:gravity=\"center\"\r\n        android:layout_marginBottom=\"16dp\" />\r\n\r\n    <ListView\r\n        android:id=\"@+id/categoryListView\"\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"0dp\"\r\n        android:layout_weight=\"1\"\r\n        android:divider=\"#EEEEEE\"\r\n        android:dividerHeight=\"1dp\" />\r\n\r\n    <Button\r\n        android:id=\"@+id/closeButton\"\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_marginTop=\"16dp\"\r\n        android:text=\"Закрыть\"\r\n        android:textColor=\"#2DC0FF\"\r\n        android:background=\"@android:color/transparent\"\r\n        android:textSize=\"16sp\" />\r\n</LinearLayout>\r\n
+===================================================================
+diff --git a/app/src/main/res/layout/dialog_unit_selection.xml b/app/src/main/res/layout/dialog_unit_selection.xml
+--- a/app/src/main/res/layout/dialog_unit_selection.xml	(revision e318e0ced3218ce6804c1ff32ffa52e7f28d48b7)
++++ b/app/src/main/res/layout/dialog_unit_selection.xml	(date 1763367269270)
+@@ -8,7 +8,7 @@
+     <TextView
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+-        android:text="Выберите категорию"
++        android:text="Выберите единицу измерения"
+         android:textSize="20sp"
+         android:textStyle="bold"
+         android:textColor="#000000"
+@@ -16,7 +16,7 @@
+         android:layout_marginBottom="16dp" />
+ 
+     <ListView
+-        android:id="@+id/categoryListView"
++        android:id="@+id/unitListView"
+         android:layout_width="match_parent"
+         android:layout_height="0dp"
+         android:layout_weight="1"
