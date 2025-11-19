@@ -130,13 +130,13 @@ class MainActivity : FullScreenActivity() {
         }
     }
 
-    private fun openProfile() {
+    // 🔹 СДЕЛАЛИ ПУБЛИЧНЫМ, ЧТОБЫ МОЖНО БЫЛО ВЫЗЫВАТЬ ИЗ ФРАГМЕНТА
+    fun openProfile() {
         drawerLayout.openDrawer(binding.profileContainer)
     }
 
     /**
      * Экран формы добавления продукта (layout: add_products.xml)
-     * Использует фрагмент ui.add_products.AddProductFragment
      */
     private fun openAddProductFragment() {
         hideMainContent()
@@ -151,8 +151,7 @@ class MainActivity : FullScreenActivity() {
     }
 
     /**
-     * 🔹 Экран ПОИСКА продуктов (layout: fragment_add_product.xml)
-     * Использует фрагмент ui.app_product.AddProductSearchFragment
+     * 🔹 Экран ПОИСКА продуктов
      */
     private fun openAddProductSearchFragment() {
         hideMainContent()
