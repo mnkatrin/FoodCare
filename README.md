@@ -33,19 +33,19 @@ UI: Material Design 3
 🏗 Архитектура приложения
 app/
 ├── data/
-│   ├── dao/           # Data Access Objects
-│   ├── database/      # Room database configuration
-│   ├── model/         # Data models
-│   └── repository/    # Repository pattern implementation
+│   ├── dao/           
+│   ├── database/     
+│   ├── model/         
+│   └── repository/    
 ├── ui/
-│   ├── auth/          # Authentication screens
-│   ├── main/          # Main activity and navigation
-│   ├── products/      # Product management
-│   ├── history/       # Usage history and analytics
-│   ├── profile/       # User profile and settings
-│   ├── moderator/     # Admin panel
-│   └── notifications/ # Push notifications
-└── utils/             # Utility classes and helpers
+│   ├── auth/          
+│   ├── main/          
+│   ├── products/      
+│   ├── history/       
+│   ├── profile/       
+│   ├── moderator/     
+│   └── notifications/ 
+└── utils/             
 
 🚀 Установка и запуск
 Требования
